@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Musiktrainer Web-App</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app"><div class="card">
+<div class="header">
+<div><h1>🎼 Musiktrainer Web-App</h1><p class="sub">Notenlesen, Rhythmus, Intervalle und Gehörbildung</p></div>
+<div class="badge">GitHub-Pages-fähig</div>
+</div>
+
+<div class="tabs">
+<button class="tab active" data-panel="studentPanel">Schülertest</button>
+<button class="tab" data-panel="teacherPanel">Lehrerbereich</button>
+<button class="tab" data-panel="aboutPanel">Info</button>
+</div>
+
+<section id="studentPanel" class="panel active">
+<div id="testBanner" class="test-banner">
+<strong id="lockedTestTitle">Vorbereiteter Test</strong>
+<span id="lockedTestSummary"></span>
+</div>
+<div id="setup">
+<div class="grid">
+<div class="field"><label>Name</label><input id="studentName" placeholder="Vor- und Nachname"></div>
+<div class="field"><label>Klasse / Kurs</label><input id="studentClass" placeholder="z. B. 7a oder Musik 11"></div>
+</div>
+
+<div id="studentOptions"><h2 style="margin-top:24px">Modul auswählen</h2>
+<div class="module-grid">
+<div class="module active" data-module="pitch"><h3>🎼 Notenlesen</h3><p>Violin-, Bass-, Alt- und Tenorschlüssel</p></div>
+<div class="module" data-module="rhythm"><h3>🥁 Rhythmus</h3><p>Notenwerte, Pausen und Taktarten</p></div>
+<div class="module" data-module="interval"><h3>🎹 Intervalle</h3><p>Notierte Intervalle erkennen</p></div>
+<div class="module" data-module="ear"><h3>🎧 Gehörbildung</h3><p>Töne, Intervalle sowie Dur und Moll hören</p></div>
+</div>
+
+<div class="grid">
+<div class="field"><label>Fragenzahl</label><select id="questionCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
+<div class="field" id="clefField"><label>Notenschlüssel</label><select id="clefSelect"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="mixed">Gemischt</option></select></div>
+<div class="field" id="difficultyField"><label>Schwierigkeit</label><select id="difficulty"><option value="easy">Grundlage</option><option value="medium" selected>Mittel</option><option value="hard">Erweitert</option></select></div>
+<div class="field" id="earTypeField" style="display:none"><label>Höraufgaben</label><select id="earType"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="mixed">Gemischt</option></select></div>
+</div>
+</div><div class="actions"><button id="startBtn" class="primary">Test starten</button></div>
+<div class="notice">Die App läuft vollständig im Browser. Ergebnisse werden auf diesem Gerät gespeichert. Audio beginnt erst nach dem Startknopf, damit es auf iPads zuverlässig funktioniert.</div>
+</div>
+
+<div id="quiz" class="quiz">
+<div class="progress-meta"><span id="progressText"></span><span id="scoreText"></span></div>
+<div class="progress"><div id="progressFill"></div></div>
+<div id="prompt" class="prompt"></div>
+<div id="visual" class="visual"></div>
+<div id="answers" class="answers"></div>
+<div id="feedback" class="feedback"></div>
+</div>
+
+<div id="result" class="result">
+<h2>Auswertung</h2><p id="resultName"></p>
+<div class="metrics">
+<div class="metric">Punkte<strong id="resultPoints"></strong></div>
+<div class="metric">Prozent<strong id="resultPercent"></strong></div>
+<div class="metric">Note<strong id="resultGrade"></strong></div>
+<div class="metric">Zeit<strong id="resultTime"></strong></div>
+</div>
+<div id="review" class="review"></div>
+<div class="actions" style="justify-content:center"><button class="primary" onclick="location.reload()">Neuen Test starten</button></div>
+</div>
+</section>
+
+<section id="teacherPanel" class="panel">
+<div id="teacherLogin">
+<h2>Lehrerbereich</h2><p>Standard-PIN: <strong>2000</strong></p>
+<div class="pinbox"><input id="teacherPin" type="password" inputmode="numeric" placeholder="PIN eingeben"></div>
+<div class="actions"><button id="loginBtn" class="primary">Öffnen</button></div>
+</div>
+<div id="teacherDashboard" style="display:none">
+<div class="builder">
+<h2>Test vorbereiten</h2>
+<p class="sub">Die Einstellungen werden in einem Testlink gespeichert. Schülerinnen und Schüler sehen nur Name, Klasse und Startknopf.</p>
+<div class="grid" style="margin-top:16px">
+<div class="field"><label>Testname</label><input id="builderTitle" value="Musiktest" placeholder="z. B. Notenlesen 7a"></div>
+<div class="field"><label>Voreingestellte Klasse</label><input id="builderClass" placeholder="z. B. 7a"></div>
+<div class="field"><label>Modul</label><select id="builderModule"><option value="pitch">Notenlesen</option><option value="rhythm">Rhythmus</option><option value="interval">Intervalle</option><option value="ear">Gehörbildung</option></select></div>
+<div class="field"><label>Fragenzahl</label><select id="builderCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
+<div class="field" id="builderClefField"><label>Notenschlüssel</label><select id="builderClef"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="mixed">Gemischt</option></select></div>
+<div class="field"><label>Schwierigkeit</label><select id="builderDifficulty"><option value="easy">Grundlage</option><option value="medium" selected>Mittel</option><option value="hard">Erweitert</option></select></div>
+<div class="field hidden" id="builderEarField"><label>Höraufgaben</label><select id="builderEar"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="mixed">Gemischt</option></select></div>
+<div class="field"><label>Rückmeldung während des Tests</label><select id="builderFeedback"><option value="on">Sofort anzeigen</option><option value="off">Erst am Ende auswerten</option></select></div>
+</div>
+<label class="checkrow"><input id="builderAdaptive" type="checkbox"> Adaptive Gewichtung früherer Fehler verwenden</label>
+<div class="actions" style="margin-top:14px">
+<button id="generateLinkBtn" class="primary">Testlink erzeugen</button>
+<button id="previewTestBtn" class="secondary">Vorschau öffnen</button>
+</div>
+<div id="builderOutput" class="builder-summary hidden">
+<strong>Fertiger Schülerlink</strong>
+<div class="linkbox"><input id="generatedLink" readonly><button id="copyLinkBtn" class="secondary">Kopieren</button></div>
+<p class="sub">Diesen Link kannst du in einen QR-Code umwandeln. Die Testeinstellungen sind in der Adresse codiert.</p>
+</div>
+</div>
+<h2>Ergebnisse und Lernstand</h2>
+<div class="teacher-tools">
+<button id="exportBtn" class="primary">CSV exportieren</button>
+<button id="backupBtn" class="secondary">Sicherung exportieren</button>
+<button id="importBtn" class="secondary">Sicherung importieren</button>
+<input id="importFile" type="file" accept=".json" hidden>
+<button id="clearBtn" class="danger">Alle Ergebnisse löschen</button>
+</div>
+<div id="stats" class="stats"></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Datum</th><th>Name</th><th>Klasse</th><th>Modul</th><th>Konfiguration</th><th>Punkte</th><th>%</th><th>Note</th><th>Zeit</th><th>Fehler</th></tr></thead>
+<tbody id="resultsBody"></tbody>
+</table></div>
+</div>
+</section>
+
+<section id="aboutPanel" class="panel">
+<h2>Web-App Basis</h2>
+<p>Diese Web-App ist in getrennte Dateien aufgeteilt und bildet die Grundlage für weitere Module, Benutzerkonten und eine spätere zentrale Ergebnisspeicherung.</p>
+<p class="sub">Eine zentrale Klassenübersicht über mehrere iPads hinweg benötigt in einer späteren Online-Version eine Datenbank und Benutzerkonten.</p>
+</section>
+<div class="footer">Musiktrainer Web-App · GitHub Pages</div>
+</div></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
