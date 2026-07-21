@@ -1,4 +1,4 @@
-# Musiktrainer Web-App 3.0.1
+# Musiktrainer Web-App 3.0.2
 
 Version 3.0 ist die erste Plattformversion des Musiktrainers.
 
@@ -37,3 +37,8 @@ Die Dateien `index.html`, `app.js`, `styles.css` und `README.md` ersetzen.
 ## Fehlerkorrektur 3.0.1
 
 In Version 2.3 war beim Umbau der Notensystemgrafik versehentlich ein Teil der Aufgabenlogik entfernt worden. Version 3.0.1 stellt die vollständigen Aufgabenpools, die Auswertung und den Startvorgang wieder her. Die kompakteren Notensysteme sowie die Klassen- und Testbibliothek bleiben erhalten.
+
+
+## Notenschlüssel-Korrektur 3.0.2
+
+Die Notenschlüssel werden nicht mehr als browserabhängige Schriftzeichen dargestellt. Stattdessen nutzt die App feste SVG-Vektorpfade. Der Violinschlüssel liegt nun innerhalb des Notensystems und ist mit seiner Spirale an der G-Linie ausgerichtet.
