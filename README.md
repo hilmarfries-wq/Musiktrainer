@@ -1,44 +1,32 @@
-# Musiktrainer Web-App 3.0.2
+# Musiktrainer Web-App 3.1
 
-Version 3.0 ist die erste Plattformversion des Musiktrainers.
+## Neue Testinhalte
 
-## Neue Funktionen
+### Notenlesen mit Vorzeichen
+- ohne Vorzeichen
+- einzelne Kreuze und Be-Zeichen
+- gemischte Aufgaben mit Auflösungszeichen
+- deutsche Notennamen einschließlich H und B
+- Vorzeichen als feste SVG-Vektorgrafik
 
-- lokale Klassenverwaltung
-- Schülerprofile pro Klasse
-- Profilwahl im Schülerbereich
-- wiederverwendbare Testbibliothek
-- gespeicherte Testvorlagen
-- Schülerlinks direkt aus der Bibliothek öffnen oder kopieren
-- bestehende Module: Notenlesen, Rhythmus, Intervalle und Gehörbildung
-- SVG-Darstellung für Rhythmus und Notensysteme
-- CSV-Export sowie JSON-Sicherung
+### Skalen
+- Dur- und Molltonleitern
+- Tonleiter anhand der Tonfolge erkennen
+- Vorzeichen bestimmen
+- Paralleltonarten zuordnen
+- gestaffelte Schwierigkeit
 
-## Wichtig zur Speicherung
+### Dreiklänge
+- Dur, Moll und vermindert erkennen
+- Grundton bestimmen
+- in der erweiterten Stufe Grundstellung und Umkehrungen erkennen
+- Darstellung direkt im Notensystem
 
-GitHub Pages stellt nur die Webseite bereit. Klassen, Testvorlagen und Ergebnisse werden derzeit im Browser des jeweiligen Geräts gespeichert.
+## Unverändert enthalten
+Rhythmus, Intervalle, Gehörbildung, Klassenverwaltung, Testbibliothek, Testlinks, CSV-Export und lokale Ergebnisspeicherung.
 
-Das bedeutet:
+## Installation
+Die Dateien aus dem ZIP in das Hauptverzeichnis des GitHub-Repositories hochladen und die vorhandenen Dateien ersetzen. `config.js` enthält weiterhin die Lehrer-PIN.
 
-- Auf deinem Lehrergerät bleiben deine Klassen und Vorlagen erhalten.
-- Auf einem anderen Gerät erscheinen diese Daten nicht automatisch.
-- Ein erzeugter Schülerlink funktioniert auf anderen Geräten, weil die Testkonfiguration im Link enthalten ist.
-- Ergebnisse der Schüler werden noch nicht automatisch an das Lehrergerät übertragen.
-
-Für zentrale Ergebnisse, echte Benutzerkonten und geräteübergreifende Klassen wird im nächsten Schritt eine Cloud-Datenbank wie Firebase oder Supabase benötigt.
-
-## Aktualisierung auf GitHub
-
-Die Dateien `index.html`, `app.js`, `styles.css` und `README.md` ersetzen.
-
-`config.js` wurde um die Versionsangabe ergänzt. Deine Lehrer-PIN kann dort weiterhin angepasst werden.
-
-
-## Fehlerkorrektur 3.0.1
-
-In Version 2.3 war beim Umbau der Notensystemgrafik versehentlich ein Teil der Aufgabenlogik entfernt worden. Version 3.0.1 stellt die vollständigen Aufgabenpools, die Auswertung und den Startvorgang wieder her. Die kompakteren Notensysteme sowie die Klassen- und Testbibliothek bleiben erhalten.
-
-
-## Notenschlüssel-Korrektur 3.0.2
-
-Die Notenschlüssel werden nicht mehr als browserabhängige Schriftzeichen dargestellt. Stattdessen nutzt die App feste SVG-Vektorpfade. Der Violinschlüssel liegt nun innerhalb des Notensystems und ist mit seiner Spirale an der G-Linie ausgerichtet.
+## Hinweis
+Rhythmus-Nachklopfen ist für Version 3.2 vorgesehen, da dafür eine eigene Timing- und Touch-Auswertung nötig ist.

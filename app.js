@@ -7,7 +7,13 @@ let selectedModule="pitch",queue=[],index=0,score=0,startedAt=0,mistakes=[],lock
 const $=id=>document.getElementById(id),shuffle=a=>[...a].sort(()=>Math.random()-.5);
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.panel).classList.add("active")});
-document.querySelectorAll(".module").forEach(m=>m.onclick=()=>{document.querySelectorAll(".module").forEach(x=>x.classList.remove("active"));m.classList.add("active");selectedModule=m.dataset.module;$("clefField").style.display=selectedModule==="pitch"?"block":"none";$("earTypeField").style.display=selectedModule==="ear"?"block":"none"});
+function updateModuleFields(){
+ const pitch=selectedModule==="pitch";
+ $("clefField").style.display=pitch?"block":"none";
+ $("accidentalField").style.display=pitch?"block":"none";
+ $("earTypeField").style.display=selectedModule==="ear"?"block":"none";
+}
+document.querySelectorAll(".module").forEach(m=>m.onclick=()=>{document.querySelectorAll(".module").forEach(x=>x.classList.remove("active"));m.classList.add("active");selectedModule=m.dataset.module;updateModuleFields()});
 
 function grade(p){return p>=90?"1":p>=80?"2":p>=65?"3":p>=50?"4":p>=30?"5":"6"}
 function fmt(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
@@ -16,7 +22,7 @@ function getResults(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||
 function saveResult(r){const d=getResults();d.push(r);localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 function getWeak(){try{return JSON.parse(localStorage.getItem(WEAK_KEY))||{}}catch{return{}}}
 function bumpWeak(key){const w=getWeak();w[key]=(w[key]||0)+1;localStorage.setItem(WEAK_KEY,JSON.stringify(w))}
-function moduleName(m){return m==="pitch"?"Notenlesen":m==="rhythm"?"Rhythmus":m==="interval"?"Intervalle":"Gehörbildung"}
+function moduleName(m){return m==="pitch"?"Notenlesen":m==="rhythm"?"Rhythmus":m==="interval"?"Intervalle":m==="ear"?"Gehörbildung":m==="scale"?"Skalen":"Dreiklänge"}
 
 const CLEFS={
 treble:{name:"Violinschlüssel",glyph:"𝄞",glyphX:105,glyphY:151,refMidi:64},
@@ -27,6 +33,7 @@ tenor:{name:"Tenorschlüssel",glyph:"𝄡",glyphX:112,glyphY:126,refMidi:57}
 
 function staffStep(note,clef){return (note.midi-CLEFS[clef].refMidi)/1}
 const MUSIC_CLEF_PATHS={"treble": "M314 801Q300 854 291.0 906.0Q282 958 282 1012Q282 1059 288.5 1100.5Q295 1142 307 1177Q320 1217 341.0 1252.5Q362 1288 385.5 1311.0Q409 1334 427 1334Q451 1334 493 1249Q514 1206 524.0 1156.0Q534 1106 534 1049Q534 978 515.0 907.5Q496 837 459.5 775.0Q423 713 372 666L407 498Q422 500 432.0 501.0Q442 502 447 502Q508 502 556.0 467.5Q604 433 632.5 377.0Q661 321 661 254Q661 177 621.5 115.5Q582 54 503 25Q508 8 532 -117Q538 -147 541.0 -164.5Q544 -182 545.0 -195.0Q546 -208 546 -225Q546 -275 521.5 -314.5Q497 -354 455.5 -376.0Q414 -398 363 -398Q311 -398 271.0 -378.5Q231 -359 208.0 -324.5Q185 -290 185 -245Q185 -197 211.5 -165.0Q238 -133 287 -133Q329 -133 355.5 -163.5Q382 -194 382 -236Q382 -272 357.0 -299.0Q332 -326 292 -326H282Q308 -365 364 -365Q433 -365 472.0 -320.0Q511 -275 511 -205Q511 -188 507.0 -159.5Q503 -131 493 -91Q483 -51 477.5 -25.0Q472 1 470 12Q436 2 390 2Q304 2 222 52Q142 102 96.0 184.0Q50 266 50 361Q50 451 91 530Q132 609 192.5 675.0Q253 741 314 801ZM341 826Q364 838 390.0 870.5Q416 903 440.0 945.0Q464 987 479.0 1029.5Q494 1072 494 1106Q494 1142 483.0 1163.0Q472 1184 445 1184Q421 1184 398.5 1162.0Q376 1140 358.5 1103.5Q341 1067 331.0 1022.0Q321 977 321 930Q321 898 327.5 872.0Q334 846 341 826ZM398 379Q371 373 347.0 353.5Q323 334 308.5 306.5Q294 279 294 248Q294 223 307.0 196.5Q320 170 339 154Q352 142 365 136Q380 129 380 123Q380 120 370 117Q332 126 301.5 151.0Q271 176 253.5 211.5Q236 247 236 287Q236 330 253.5 370.0Q271 410 302.5 442.0Q334 474 374 490L345 641Q229 547 174.5 456.5Q120 366 120 277Q120 212 154.0 156.0Q188 100 247.0 65.5Q306 31 380 31Q400 31 420.5 35.0Q441 39 464 45ZM495 55Q593 97 593 227Q593 270 571.0 305.5Q549 341 512.0 362.0Q475 383 429 383Z", "bass": "M50 123Q216 231 288 301Q336 348 373.0 408.5Q410 469 431.5 536.0Q453 603 453 669Q453 728 435.0 773.5Q417 819 383.0 845.0Q349 871 302 871Q284 871 264.5 867.0Q245 863 224 855Q181 839 158.0 813.5Q135 788 135 765Q135 756 143.0 752.0Q151 748 158 748Q168 748 183 752Q190 754 196.5 755.0Q203 756 210 756Q248 756 272.0 733.5Q296 711 296 674Q296 638 266.0 612.0Q236 586 195 586Q146 586 111.0 617.0Q76 648 76 697Q76 756 109.0 802.0Q142 848 198.5 874.0Q255 900 324 900Q400 900 460.0 867.0Q520 834 555.5 776.5Q591 719 591 646Q591 551 538 464Q511 419 476.5 379.0Q442 339 389.0 297.5Q336 256 256.0 208.0Q176 160 57 101ZM687 809Q710 809 726.0 793.0Q742 777 742 754Q742 731 726.0 715.5Q710 700 687 700Q664 700 648.0 715.5Q632 731 632 754Q632 777 648.0 793.0Q664 809 687 809ZM687 589Q710 589 726.0 573.0Q742 557 742 534Q742 511 726.0 495.5Q710 480 687 480Q664 480 648.0 495.5Q632 511 632 534Q632 557 648.0 573.0Q664 589 687 589Z", "cClef": "M226 0V1000H263V510Q281 519 301.0 546.0Q321 573 339.0 608.5Q357 644 370.0 679.5Q383 715 386 742Q396 673 427.0 633.5Q458 594 503 594Q548 594 570 631Q593 668 593 775Q593 818 590.5 848.5Q588 879 582 898Q569 942 541.0 960.5Q513 979 470 979Q447 979 434.0 969.5Q421 960 421 951Q421 944 428.0 934.0Q435 924 443 914Q460 894 460 877Q460 853 442.5 833.5Q425 814 392 814Q362 814 342.5 835.5Q323 857 323 887Q323 924 347.5 952.0Q372 980 411.5 996.0Q451 1012 497 1012Q561 1012 612.0 982.0Q663 952 693.5 899.0Q724 846 724 777Q724 734 714.5 698.0Q705 662 685 633Q658 595 616.0 573.5Q574 552 527 552Q505 552 481.5 557.5Q458 563 437 574L390 500L437 426Q460 435 484.0 440.0Q508 445 532 445Q587 445 630.5 414.0Q674 383 699.0 332.0Q724 281 724 219Q724 157 694.0 104.5Q664 52 613.0 21.0Q562 -10 497 -10Q413 -10 368.0 23.5Q323 57 323 115Q323 145 342.5 166.5Q362 188 392 188Q425 188 442.5 168.5Q460 149 460 125Q460 106 443 88Q434 78 427.5 69.0Q421 60 421 52Q421 40 434.0 31.5Q447 23 470 23Q532 23 563.5 68.5Q595 114 595 219Q595 311 574.0 358.5Q553 406 503 406Q457 406 427.0 367.0Q397 328 388 260Q379 309 360.0 355.0Q341 401 316.0 437.0Q291 473 263 492V0ZM50 0V1000H167V0Z"};
+const MUSIC_ACCIDENTAL_PATHS={"sharp": "M502 82 404 39V-135H357V20L196 -58V-233H149V-77L51 -124V-46L149 0V245L51 198V276L149 323V482H196V342L357 420V590H404V439L502 485V408L404 361V116L502 160ZM357 97V342L196 264V19Z", "flat": "M51 524H88V179Q117 220 148.0 243.5Q179 267 209 267Q250 267 273.0 242.0Q296 217 296 173Q296 115 263 70Q241 40 208.0 19.0Q175 -2 138.5 -13.5Q102 -25 69 -25H51ZM88 141V3Q115 3 153 25Q192 47 215.5 83.0Q239 119 239 162Q239 191 230.5 206.5Q222 222 199 222Q171 222 140.5 198.0Q110 174 88 141Z", "natural": "M306 -213H259V-59L51 -156V404H98V264L306 361ZM259 19V261L98 186V-57Z"};
 function clefSvg(clef){
  if(clef==="treble"){
   // The treble-clef spiral is centred on the second staff line from below (G line).
@@ -38,6 +45,13 @@ function clefSvg(clef){
  }
  const y=clef==="tenor"?151:160;
  return `<path d="${MUSIC_CLEF_PATHS.cClef}" transform="translate(68 ${y}) scale(.083 -.083)" fill="#182033"/>`;
+}
+function accidentalSvg(kind,x,y){
+ if(!kind)return "";
+ const path=MUSIC_ACCIDENTAL_PATHS[kind];
+ const scale=kind==="flat"?0.034:0.031;
+ const yShift=kind==="flat"?y+20:y+18;
+ return `<path d="${path}" transform="translate(${x} ${yShift}) scale(${scale} -${scale})" fill="#182033"/>`;
 }
 function drawStaff(items,clef){
  const c=CLEFS[clef];
@@ -62,7 +76,7 @@ function drawStaff(items,clef){
   const stem=stemUp
    ? `<line x1="${x+16}" y1="${y-2}" x2="${x+16}" y2="${y-62}" stroke="#182033" stroke-width="4"/>`
    : `<line x1="${x-16}" y1="${y+2}" x2="${x-16}" y2="${y+62}" stroke="#182033" stroke-width="4"/>`;
-  return `${ledger}<ellipse cx="${x}" cy="${y}" rx="17" ry="11.5" transform="rotate(-18 ${x} ${y})" fill="#182033"/>${stem}`;
+  return `${ledger}${accidentalSvg(n.accidental,x-43,y)}<ellipse cx="${x}" cy="${y}" rx="17" ry="11.5" transform="rotate(-18 ${x} ${y})" fill="#182033"/>${stem}`;
  }).join("");
 
  return `<svg class="staff-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Notensystem mit ${c.name}">
@@ -79,11 +93,37 @@ function offsetForClef(n,clef){
 }
 function noteOptions(correct,pool){const near=pool.filter(n=>n.id!==correct.id).sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi)).slice(0,7);return shuffle([correct.label,...shuffle(near).slice(0,3).map(n=>n.label)])}
 
+const ACCIDENTAL_NAMES={
+ sharp:{c:"cis",d:"dis",e:"eis",f:"fis",g:"gis",a:"ais",h:"his"},
+ flat:{c:"ces",d:"des",e:"es",f:"fes",g:"ges",a:"as",h:"b"},
+ natural:{c:"c",d:"d",e:"e",f:"f",g:"g",a:"a",h:"h"}
+};
+function accidentalPitchPool(basePool,mode){
+ const allowed=mode==="none"?[null]:mode==="single"?[null,"sharp","flat"]:[null,"sharp","flat","natural"];
+ const out=[];
+ basePool.forEach(n=>allowed.forEach(accidental=>{
+  if(accidental==="sharp" && ["e","h"].includes(n.name))return;
+  if(accidental==="flat" && ["c","f"].includes(n.name))return;
+  const name=accidental?ACCIDENTAL_NAMES[accidental][n.name]:n.name;
+  const suffix=n.label.slice(n.name.length);
+  out.push({...n,id:`${n.id}:${accidental||"none"}`,label:name+suffix,accidental})
+ }));
+ return out
+}
 function pitchPool(){
- const diff=$("difficulty").value;let pool=NOTES.filter(n=>diff==="easy"?n.midi>=52&&n.midi<=67:diff==="medium"?n.midi>=48&&n.midi<=72:true);
- const clefSel=$("clefSelect").value, clefs=clefSel==="mixed"?["treble","bass","alto","tenor"]:[clefSel];
- let out=[];clefs.forEach(c=>pool.forEach(n=>out.push({type:"pitch",prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,correct:n.label,options:noteOptions(n,pool),clef:c,note:{...n,diatonicOffset:offsetForClef(n,c)},weakKey:`pitch:${c}:${n.id}`})));
- return out;
+ const diff=$("difficulty").value;
+ let naturals=NOTES.filter(n=>diff==="easy"?n.midi>=52&&n.midi<=67:diff==="medium"?n.midi>=48&&n.midi<=72:true);
+ const mode=$("accidentalMode").value;
+ const pool=accidentalPitchPool(naturals,mode);
+ const clefSel=$("clefSelect").value,clefs=clefSel==="mixed"?["treble","bass","alto","tenor"]:[clefSel];
+ let out=[];
+ clefs.forEach(c=>pool.forEach(n=>out.push({
+  type:"pitch",prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,correct:n.label,
+  options:noteOptions(n,pool),clef:c,
+  note:{...n,diatonicOffset:offsetForClef(n,c)},
+  weakKey:`pitch:${c}:${n.id}`
+ })));
+ return out
 }
 function rhythmPool(){
  const d=[
@@ -157,6 +197,81 @@ function earPool(){
  if(type==="chord"||type==="mixed") [["Dur",[60,64,67]],["Moll",[60,63,67]]].forEach(x=>out.push({type:"ear-chord",prompt:"Klingt der Akkord in Dur oder Moll?",correct:x[0],options:["Dur","Moll"],midi:x[1],simultaneous:true,weakKey:`ear-chord:${x[0]}`}));
  return out
 }
+const SCALE_DATA=[
+ {name:"C-Dur",notes:["c","d","e","f","g","a","h","c"],signs:"keine",parallel:"a-Moll"},
+ {name:"G-Dur",notes:["g","a","h","c","d","e","fis","g"],signs:"1 Kreuz: fis",parallel:"e-Moll"},
+ {name:"D-Dur",notes:["d","e","fis","g","a","h","cis","d"],signs:"2 Kreuze: fis, cis",parallel:"h-Moll"},
+ {name:"F-Dur",notes:["f","g","a","b","c","d","e","f"],signs:"1 Be: b",parallel:"d-Moll"},
+ {name:"B-Dur",notes:["b","c","d","es","f","g","a","b"],signs:"2 Be: b, es",parallel:"g-Moll"},
+ {name:"a-Moll",notes:["a","h","c","d","e","f","g","a"],signs:"keine",parallel:"C-Dur"},
+ {name:"e-Moll",notes:["e","fis","g","a","h","c","d","e"],signs:"1 Kreuz: fis",parallel:"G-Dur"},
+ {name:"d-Moll",notes:["d","e","f","g","a","b","c","d"],signs:"1 Be: b",parallel:"F-Dur"}
+];
+function scaleVisual(q){
+ return `<div class="theory-card"><div class="tone-row">${q.display.map(n=>`<span>${n}</span>`).join("")}</div></div>`
+}
+function scalePool(){
+ const diff=$("difficulty").value;
+ const data=diff==="easy"?SCALE_DATA.filter(s=>["C-Dur","G-Dur","F-Dur","a-Moll"].includes(s.name)):diff==="medium"?SCALE_DATA:SCALE_DATA;
+ const names=data.map(s=>s.name),out=[];
+ data.forEach(s=>{
+  out.push({type:"scale",prompt:"Welche Tonleiter ist dargestellt?",correct:s.name,
+   options:shuffle([s.name,...shuffle(names.filter(x=>x!==s.name)).slice(0,3)]),display:s.notes,
+   weakKey:`scale:name:${s.name}`});
+  out.push({type:"scale-text",prompt:`Welche Vorzeichen hat ${s.name}?`,correct:s.signs,
+   options:shuffle([s.signs,...shuffle([...new Set(data.map(x=>x.signs).filter(x=>x!==s.signs))]).slice(0,3)]),
+   display:[s.name],weakKey:`scale:signs:${s.name}`});
+  if(diff!=="easy")out.push({type:"scale-text",prompt:`Welche Paralleltonart gehört zu ${s.name}?`,correct:s.parallel,
+   options:shuffle([s.parallel,...shuffle(names.filter(x=>x!==s.parallel)).slice(0,3)]),
+   display:[s.name],weakKey:`scale:parallel:${s.name}`});
+ });
+ return out
+}
+const TRIAD_DATA=[
+ {root:"C",quality:"Dur",notes:["c","e","g"],midi:[60,64,67]},
+ {root:"D",quality:"Moll",notes:["d","f","a"],midi:[62,65,69]},
+ {root:"E",quality:"Moll",notes:["e","g","h"],midi:[64,67,71]},
+ {root:"F",quality:"Dur",notes:["f","a","c"],midi:[65,69,72]},
+ {root:"G",quality:"Dur",notes:["g","h","d"],midi:[67,71,74]},
+ {root:"A",quality:"Moll",notes:["a","c","e"],midi:[57,60,64]},
+ {root:"H",quality:"Vermindert",notes:["h","d","f"],midi:[59,62,65]}
+];
+function noteFromMidi(midi,name){
+ const oct=Math.floor(midi/12)-1;
+ return {name:name.toLowerCase(),oct,midi,label:name.toLowerCase(),diatonicOffset:0}
+}
+function triadPool(){
+ const diff=$("difficulty").value,out=[];
+ TRIAD_DATA.forEach(t=>{
+  const notes=t.midi.map((m,i)=>{const n=noteFromMidi(m,t.notes[i]);return {...n,diatonicOffset:offsetForClef(n,"treble")}});
+  out.push({type:"triad",prompt:"Welches Tongeschlecht hat dieser Dreiklang?",correct:t.quality,
+   options:diff==="easy"?["Dur","Moll"]:["Dur","Moll","Vermindert","Übermäßig"],
+   clef:"treble",notes,weakKey:`triad:quality:${t.root}:${t.quality}`});
+  if(diff!=="easy")out.push({type:"triad",prompt:"Welcher Grundton gehört zu diesem Dreiklang?",correct:t.root,
+   options:shuffle([t.root,...shuffle(TRIAD_DATA.map(x=>x.root).filter(x=>x!==t.root)).slice(0,3)]),
+   clef:"treble",notes,weakKey:`triad:root:${t.root}`});
+ });
+ if(diff==="hard"){
+  const inversions=[
+   {name:"Grundstellung",order:[0,1,2]},
+   {name:"1. Umkehrung",order:[1,2,0]},
+   {name:"2. Umkehrung",order:[2,0,1]}
+  ];
+  TRIAD_DATA.filter(t=>t.quality!=="Vermindert").forEach(t=>inversions.forEach(inv=>{
+   const raw=inv.order.map((idx,i)=>{
+    let midi=t.midi[idx];
+    while(i&&midi<=t.midi[inv.order[i-1]])midi+=12;
+    const n=noteFromMidi(midi,t.notes[idx]);
+    return {...n,diatonicOffset:offsetForClef(n,"treble")}
+   });
+   out.push({type:"triad",prompt:`In welcher Lage steht der ${t.root}-${t.quality}-Dreiklang?`,correct:inv.name,
+    options:["Grundstellung","1. Umkehrung","2. Umkehrung"],clef:"treble",notes:raw,
+    weakKey:`triad:inv:${t.root}:${inv.name}`})
+  }))
+ }
+ return out
+}
+
 function adaptivePick(pool,count){
  const weak=getWeak(),weighted=[];pool.forEach(q=>{const w=Math.min(4,1+(weak[q.weakKey]||0));for(let i=0;i<w;i++)weighted.push(q)});
  const result=[],used=new Set();while(result.length<count&&weighted.length){const q=weighted[Math.floor(Math.random()*weighted.length)];const key=q.weakKey+"-"+result.length;if(!used.has(q.weakKey)||pool.length<count){result.push(q);used.add(q.weakKey)}weighted.splice(weighted.indexOf(q),1)}
@@ -183,6 +298,8 @@ function renderQuestion(){
  if(q.type==="pitch")$("visual").innerHTML=drawStaff([q.note],q.clef);
  else if(q.type==="interval")$("visual").innerHTML=drawStaff(q.notes,q.clef);
  else if(q.type==="rhythm")$("visual").innerHTML=rhythmVisualSvg(q.visual);
+ else if(q.type==="scale"||q.type==="scale-text")$("visual").innerHTML=scaleVisual(q);
+ else if(q.type==="triad")$("visual").innerHTML=drawStaff(q.notes,q.clef);
  else $("visual").innerHTML=`<div class="audio-box"><button class="audio-btn" id="playAudio">▶ Hörbeispiel abspielen</button><p class="sub">Du kannst das Beispiel mehrfach anhören.</p></div>`;
  if(q.type.startsWith("ear")){$("playAudio").onclick=()=>playMidi(q.midi,q.simultaneous);setTimeout(()=>$("playAudio").click(),250)}
  $("answers").innerHTML="";q.options.forEach(opt=>{const b=document.createElement("button");b.className="answer";b.textContent=opt;b.onclick=()=>choose(b,opt,q);$("answers").appendChild(b)})
@@ -205,10 +322,12 @@ function finish(){
  $("quiz").style.display="none";$("result").style.display="block";const percent=Math.round(score/queue.length*100),secs=Math.round((Date.now()-startedAt)/1000),g=grade(percent),name=$("studentName").value.trim()||"Ohne Namensangabe",klass=$("studentClass").value.trim()||"–";
  $("resultName").textContent=`${name} · ${klass} · ${moduleName(selectedModule)}`;$("resultPoints").textContent=`${score} / ${queue.length}`;$("resultPercent").textContent=`${percent} %`;$("resultGrade").textContent=g;$("resultTime").textContent=fmt(secs);
  $("review").innerHTML=mistakes.length?`<h3>Zu wiederholen</h3><ul>${mistakes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"<h3>Alle Aufgaben richtig gelöst.</h3>";
- const config=lockedConfig?`${lockedConfig.title} · ${lockedConfig.summary}`:(selectedModule==="pitch"?CLEFS[$("clefSelect").value]?.name||"Gemischt":selectedModule==="ear"?$("earType").options[$("earType").selectedIndex].text:$("difficulty").options[$("difficulty").selectedIndex].text);
+ const config=lockedConfig?`${lockedConfig.title} · ${lockedConfig.summary}`:(selectedModule==="pitch"?`${CLEFS[$("clefSelect").value]?.name||"Gemischt"}, ${$("accidentalMode").options[$("accidentalMode").selectedIndex].text}`:selectedModule==="ear"?$("earType").options[$("earType").selectedIndex].text:$("difficulty").options[$("difficulty").selectedIndex].text);
  saveResult({timestamp:new Date().toISOString(),name,klass,module:moduleName(selectedModule),config,score,total:queue.length,percent,grade:g,seconds:secs,mistakes})
 }
-$("startBtn").onclick=()=>{if(selectedModule==="ear")ensureAudio();let pool=selectedModule==="pitch"?pitchPool():selectedModule==="rhythm"?rhythmPool():selectedModule==="interval"?intervalPool():earPool();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";renderQuestion()};
+$("startBtn").onclick=()=>{if(selectedModule==="ear")ensureAudio();
+ const pools={pitch:pitchPool,rhythm:rhythmPool,interval:intervalPool,ear:earPool,scale:scalePool,triad:triadPool};
+ let pool=pools[selectedModule]();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";renderQuestion()};
 
 function renderResults(){
  const d=getResults().slice().reverse(),body=$("resultsBody");if(!d.length){body.innerHTML='<tr><td colspan="10">Noch keine Ergebnisse gespeichert.</td></tr>';$("stats").innerHTML="";return}
@@ -244,11 +363,12 @@ function buildConfig(){
   v:1,title:$("builderTitle").value.trim()||"Musiktest",
   klass:$("builderClass").value.trim(),module,
   count:Number($("builderCount").value),
-  clef:$("builderClef").value,difficulty:$("builderDifficulty").value,
+  clef:$("builderClef").value,accidentalMode:$("builderAccidental").value,difficulty:$("builderDifficulty").value,
   earType:$("builderEar").value,feedback:$("builderFeedback").value,
   adaptive:$("builderAdaptive").checked,
   summary:module==="pitch"?`${labelFor("builderClef")}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`:
           module==="ear"?`${labelFor("builderEar")}, ${$("builderCount").value} Fragen`:
+          module==="scale"||module==="triad"?`${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`:
           `${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`
  }
 }
@@ -260,6 +380,7 @@ function makeTestLink(){
 $("builderModule").onchange=()=>{
  const m=$("builderModule").value;
  $("builderClefField").classList.toggle("hidden",m!=="pitch");
+ $("builderAccidentalField").classList.toggle("hidden",m!=="pitch");
  $("builderEarField").classList.toggle("hidden",m!=="ear")
 };
 $("generateLinkBtn").onclick=()=>{
@@ -273,7 +394,7 @@ $("copyLinkBtn").onclick=async()=>{
 $("previewTestBtn").onclick=()=>window.open(makeTestLink(),"_blank");
 
 function applyLockedTest(cfg){
- if(!cfg||!["pitch","rhythm","interval","ear"].includes(cfg.module))return;
+ if(!cfg||!["pitch","rhythm","interval","ear","scale","triad"].includes(cfg.module))return;
  lockedConfig=cfg;selectedModule=cfg.module;
  document.body.classList.add("locked-test");
  $("lockedTestTitle").textContent=cfg.title||"Vorbereiteter Test";
@@ -282,10 +403,12 @@ function applyLockedTest(cfg){
  $("studentClass").readOnly=Boolean(cfg.klass);
  $("questionCount").value=String(cfg.count||10);
  $("clefSelect").value=cfg.clef||"treble";
+ $("accidentalMode").value=cfg.accidentalMode||"single";
  $("difficulty").value=cfg.difficulty||"medium";
  $("earType").value=cfg.earType||"tone";
  document.querySelectorAll(".module").forEach(m=>m.classList.toggle("active",m.dataset.module===cfg.module));
  $("clefField").style.display=cfg.module==="pitch"?"block":"none";
+ $("accidentalField").style.display=cfg.module==="pitch"?"block":"none";
  $("earTypeField").style.display=cfg.module==="ear"?"block":"none";
  document.title=`${cfg.title||"Musiktest"} · Musiktrainer Web-App`
 }
