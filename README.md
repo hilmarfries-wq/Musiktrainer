@@ -1,62 +1,34 @@
-# Musiktrainer Web-App 2.3
+# Musiktrainer Web-App 3.0
 
-Dies ist die neue Projektbasis des Musiktrainers. Die Anwendung ist nicht mehr in einer einzigen HTML-Datei gespeichert, sondern in getrennte Dateien gegliedert.
+Version 3.0 ist die erste Plattformversion des Musiktrainers.
 
-## Dateien
+## Neue Funktionen
 
-- `index.html` – Oberfläche
-- `styles.css` – Gestaltung
-- `app.js` – Aufgabenlogik, Testgenerator und Auswertung
-- `config.js` – Grundeinstellungen
-- `.nojekyll` – verhindert eine unnötige Jekyll-Verarbeitung bei GitHub Pages
+- lokale Klassenverwaltung
+- Schülerprofile pro Klasse
+- Profilwahl im Schülerbereich
+- wiederverwendbare Testbibliothek
+- gespeicherte Testvorlagen
+- Schülerlinks direkt aus der Bibliothek öffnen oder kopieren
+- bestehende Module: Notenlesen, Rhythmus, Intervalle und Gehörbildung
+- SVG-Darstellung für Rhythmus und Notensysteme
+- CSV-Export sowie JSON-Sicherung
 
-## Auf GitHub Pages veröffentlichen
+## Wichtig zur Speicherung
 
-1. Ein neues öffentliches GitHub-Repository erstellen, zum Beispiel `musiktrainer`.
-2. Alle Dateien aus diesem Ordner in das Hauptverzeichnis des Repositorys hochladen.
-3. Unter **Settings → Pages** die Veröffentlichung aus dem Branch `main` und dem Ordner `/ (root)` aktivieren.
-4. Die Adresse lautet anschließend üblicherweise:
-   `https://DEIN-NAME.github.io/musiktrainer/`
+GitHub Pages stellt nur die Webseite bereit. Klassen, Testvorlagen und Ergebnisse werden derzeit im Browser des jeweiligen Geräts gespeichert.
 
-Es muss keine Datei umbenannt werden: `index.html` ist bereits vorhanden.
+Das bedeutet:
 
-## Lehrerbereich
+- Auf deinem Lehrergerät bleiben deine Klassen und Vorlagen erhalten.
+- Auf einem anderen Gerät erscheinen diese Daten nicht automatisch.
+- Ein erzeugter Schülerlink funktioniert auf anderen Geräten, weil die Testkonfiguration im Link enthalten ist.
+- Ergebnisse der Schüler werden noch nicht automatisch an das Lehrergerät übertragen.
 
-Die Standard-PIN steht in `config.js`:
+Für zentrale Ergebnisse, echte Benutzerkonten und geräteübergreifende Klassen wird im nächsten Schritt eine Cloud-Datenbank wie Firebase oder Supabase benötigt.
 
-```js
-teacherPin: "2000"
-```
+## Aktualisierung auf GitHub
 
-Dort kann sie vor dem Hochladen geändert werden.
+Die Dateien `index.html`, `app.js`, `styles.css` und `README.md` ersetzen.
 
-## Aktueller Speicherbetrieb
-
-Die Ergebnisse werden weiterhin lokal im Browser gespeichert. Damit Ergebnisse von mehreren Schüler-iPads zentral beim Lehrer ankommen, wird als nächster Entwicklungsschritt ein Cloud-Datendienst ergänzt.
-
-## Nächste Ausbaustufe
-
-- Lehrer- und Schülerkonten
-- Klassen und Kurse
-- zentrale Tests
-- zentrale Ergebnisübertragung
-- QR-Code direkt im Lehrerbereich
-- Bearbeitungszeit und Testfreigabe
-- Aufgabenbibliothek
-
-
-## Änderung in Version 2.2
-
-Die Rhythmuszeichen werden nicht mehr als Unicode-Zeichen dargestellt. Ganze, halbe, Viertel-, Achtel- und Sechzehntelnoten, Punktierungen sowie Pausen werden nun direkt als SVG gezeichnet. Dadurch ist die Darstellung insbesondere auf iPads und in Safari unabhängig von installierten Musikschriftarten.
-
-
-## Änderung in Version 2.3
-
-Die Darstellung des Notenlese-Moduls wurde neu abgestimmt:
-
-- kompakterer Abstand der fünf Notenlinien
-- deutlich größere und passend ausgerichtete Notenschlüssel
-- eigene Größen für Violin-, Bass-, Alt- und Tenorschlüssel
-- näher zusammengerückte Anordnung von Schlüssel, System und Note
-- proportional passende Hilfslinien
-- verbesserte Skalierung auf iPad, Smartphone und Desktop
+`config.js` wurde um die Versionsangabe ergänzt. Deine Lehrer-PIN kann dort weiterhin angepasst werden.

@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Musiktrainer Web-App 2.3</title>
+<title>Musiktrainer Web-App 3.0</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app"><div class="card">
 <div class="header">
-<div><h1>🎼 Musiktrainer Web-App 2.3</h1><p class="sub">Notenlesen, Rhythmus, Intervalle und Gehörbildung</p></div>
+<div><h1>🎼 Musiktrainer Web-App 3.0</h1><p class="sub">Notenlesen, Rhythmus, Intervalle und Gehörbildung</p></div>
 <div class="badge">GitHub-Pages-fähig</div>
 </div>
 
@@ -26,6 +26,7 @@
 </div>
 <div id="setup">
 <div class="grid">
+<div class="field"><label>Schülerprofil (optional)</label><select id="studentProfile"><option value="">Profil auswählen</option></select></div>
 <div class="field"><label>Name</label><input id="studentName" placeholder="Vor- und Nachname"></div>
 <div class="field"><label>Klasse / Kurs</label><input id="studentClass" placeholder="z. B. 7a oder Musik 11"></div>
 </div>
@@ -77,6 +78,25 @@
 <div class="actions"><button id="loginBtn" class="primary">Öffnen</button></div>
 </div>
 <div id="teacherDashboard" style="display:none">
+<div class="platform-grid">
+<section class="manager-card">
+<h2>Klassenverwaltung</h2>
+<p class="sub">Klassen und Schülerprofile werden auf diesem Gerät gespeichert.</p>
+<div class="grid">
+<div class="field"><label>Klassenname</label><input id="className" placeholder="z. B. 7a"></div>
+<div class="field"><label>Schülernamen</label><textarea id="classStudents" rows="4" placeholder="Ein Name pro Zeile"></textarea></div>
+</div>
+<div class="actions"><button id="saveClassBtn" class="primary">Klasse speichern</button></div>
+<div id="classList" class="item-list"></div>
+</section>
+
+<section class="manager-card">
+<h2>Testbibliothek</h2>
+<p class="sub">Speichere häufig verwendete Testeinstellungen und öffne später sofort einen neuen Schülerlink.</p>
+<div id="testLibrary" class="item-list"></div>
+</section>
+</div>
+
 <div class="builder">
 <h2>Test vorbereiten</h2>
 <p class="sub">Die Einstellungen werden in einem Testlink gespeichert. Schülerinnen und Schüler sehen nur Name, Klasse und Startknopf.</p>
@@ -94,6 +114,7 @@
 <div class="actions" style="margin-top:14px">
 <button id="generateLinkBtn" class="primary">Testlink erzeugen</button>
 <button id="previewTestBtn" class="secondary">Vorschau öffnen</button>
+<button id="saveTemplateBtn" class="secondary">In Testbibliothek speichern</button>
 </div>
 <div id="builderOutput" class="builder-summary hidden">
 <strong>Fertiger Schülerlink</strong>
@@ -118,11 +139,11 @@
 </section>
 
 <section id="aboutPanel" class="panel">
-<h2>Version 2.3</h2>
-<p>Diese Web-App ist in getrennte Dateien aufgeteilt und bildet die Grundlage für weitere Module, Benutzerkonten und eine spätere zentrale Ergebnisspeicherung.</p>
-<p class="sub">Eine zentrale Klassenübersicht über mehrere iPads hinweg benötigt in einer späteren Online-Version eine Datenbank und Benutzerkonten.</p>
+<h2>Version 3.0</h2>
+<p>Version 3.0 ergänzt eine lokale Klassenverwaltung, Schülerprofile und eine wiederverwendbare Testbibliothek.</p>
+<p class="sub">Klassen, Profile, Testvorlagen und Ergebnisse werden momentan auf dem jeweiligen Gerät gespeichert. Für geräteübergreifende Konten und eine zentrale Ergebnisübertragung wird später eine Cloud-Datenbank verbunden.</p>
 </section>
-<div class="footer">Musiktrainer Web-App 2.3 · Überarbeitete Notensysteme · GitHub Pages</div>
+<div class="footer">Musiktrainer Web-App 3.0 · Klassen und Testbibliothek · GitHub Pages</div>
 </div></div>
 
 <script src="config.js"></script>

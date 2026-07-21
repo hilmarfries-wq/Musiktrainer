@@ -68,3 +68,14 @@ table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:11px 10p
   .staff-svg{width:100%;max-height:250px}
   #visual{padding:6px}
 }
+
+.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.manager-card{border:1px solid #dfe5ef;border-radius:18px;padding:20px;background:#fbfcff}
+.field textarea{width:100%;border:1px solid #cfd7e6;border-radius:12px;padding:12px;font:inherit;resize:vertical;background:white;color:var(--ink)}
+.item-list{display:grid;gap:10px;margin-top:16px}
+.library-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid #dfe5ef;border-radius:14px;background:white}
+.library-item div:first-child{display:grid;gap:3px}
+.library-item span,.empty{font-size:.9rem;color:var(--muted)}
+.mini-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}
+.mini-actions button{padding:8px 10px;font-size:.85rem}
+@media(max-width:850px){.platform-grid{grid-template-columns:1fr}.library-item{align-items:flex-start;flex-direction:column}.mini-actions{justify-content:flex-start}}

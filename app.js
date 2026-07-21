@@ -2,6 +2,7 @@ const NOTES=[{"id": "c2", "name": "c", "oct": 2, "label": "c", "midi": 36}, {"id
 const APP_CONFIG=window.MUSIKTRAINER_CONFIG||{};
 const STORAGE_KEY="musiktrainer_webapp_results",WEAK_KEY="musiktrainer_webapp_weak";
 const TEACHER_PIN=APP_CONFIG.teacherPin||"2000";
+const CLASS_KEY="musiktrainer_v30_classes",TEMPLATE_KEY="musiktrainer_v30_templates";
 let selectedModule="pitch",queue=[],index=0,score=0,startedAt=0,mistakes=[],locked=false,currentAudio=null,audioCtx=null,lockedConfig=null,deferredAnswers=[];
 const $=id=>document.getElementById(id),shuffle=a=>[...a].sort(()=>Math.random()-.5);
 
@@ -175,6 +176,96 @@ function applyLockedTest(cfg){
  $("earTypeField").style.display=cfg.module==="ear"?"block":"none";
  document.title=`${cfg.title||"Musiktest"} · Musiktrainer Web-App`
 }
+
+function loadClasses(){try{return JSON.parse(localStorage.getItem(CLASS_KEY)||"[]")}catch{return []}}
+function saveClasses(items){localStorage.setItem(CLASS_KEY,JSON.stringify(items))}
+function loadTemplates(){try{return JSON.parse(localStorage.getItem(TEMPLATE_KEY)||"[]")}catch{return []}}
+function saveTemplates(items){localStorage.setItem(TEMPLATE_KEY,JSON.stringify(items))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function linkForConfig(cfg){
+ const url=new URL(location.href);url.search="";url.hash="test="+b64Encode(cfg);return url.toString()
+}
+function refreshProfiles(){
+ const select=$("studentProfile");if(!select)return;
+ const current=select.value;
+ select.innerHTML='<option value="">Profil auswählen</option>';
+ loadClasses().forEach(cls=>cls.students.forEach(name=>{
+  const opt=document.createElement("option");
+  opt.value=JSON.stringify({name,klass:cls.name});opt.textContent=`${name} · ${cls.name}`;select.appendChild(opt)
+ }));
+ select.value=current;
+}
+function renderClasses(){
+ const host=$("classList");if(!host)return;
+ const classes=loadClasses();
+ if(!classes.length){host.innerHTML='<p class="empty">Noch keine Klassen gespeichert.</p>';refreshProfiles();return}
+ host.innerHTML=classes.map(cls=>`
+  <article class="library-item">
+   <div><strong>${esc(cls.name)}</strong><span>${cls.students.length} Schülerprofil${cls.students.length===1?"":"e"}</span></div>
+   <div class="mini-actions">
+    <button class="secondary edit-class" data-id="${cls.id}">Bearbeiten</button>
+    <button class="danger delete-class" data-id="${cls.id}">Löschen</button>
+   </div>
+  </article>`).join("");
+ host.querySelectorAll(".edit-class").forEach(b=>b.onclick=()=>{
+  const cls=loadClasses().find(x=>x.id===b.dataset.id);if(!cls)return;
+  $("className").value=cls.name;$("classStudents").value=cls.students.join("\n");$("className").dataset.editId=cls.id;
+ });
+ host.querySelectorAll(".delete-class").forEach(b=>b.onclick=()=>{
+  if(!confirm("Diese Klasse löschen?"))return;
+  saveClasses(loadClasses().filter(x=>x.id!==b.dataset.id));renderClasses()
+ });
+ refreshProfiles()
+}
+function renderTemplates(){
+ const host=$("testLibrary");if(!host)return;
+ const templates=loadTemplates();
+ if(!templates.length){host.innerHTML='<p class="empty">Noch keine Testvorlagen gespeichert.</p>';return}
+ host.innerHTML=templates.map(t=>`
+  <article class="library-item">
+   <div><strong>${esc(t.config.title)}</strong><span>${esc(t.config.summary)}</span></div>
+   <div class="mini-actions">
+    <button class="primary open-template" data-id="${t.id}">Öffnen</button>
+    <button class="secondary copy-template" data-id="${t.id}">Link kopieren</button>
+    <button class="danger delete-template" data-id="${t.id}">Löschen</button>
+   </div>
+  </article>`).join("");
+ host.querySelectorAll(".open-template").forEach(b=>b.onclick=()=>{
+  const t=loadTemplates().find(x=>x.id===b.dataset.id);if(t)window.open(linkForConfig(t.config),"_blank")
+ });
+ host.querySelectorAll(".copy-template").forEach(b=>b.onclick=async()=>{
+  const t=loadTemplates().find(x=>x.id===b.dataset.id);if(!t)return;
+  const link=linkForConfig(t.config);
+  try{await navigator.clipboard.writeText(link);b.textContent="Kopiert";setTimeout(()=>b.textContent="Link kopieren",1200)}
+  catch{prompt("Link kopieren:",link)}
+ });
+ host.querySelectorAll(".delete-template").forEach(b=>b.onclick=()=>{
+  if(!confirm("Diese Testvorlage löschen?"))return;
+  saveTemplates(loadTemplates().filter(x=>x.id!==b.dataset.id));renderTemplates()
+ })
+}
+$("studentProfile").onchange=()=>{
+ if(!$("studentProfile").value)return;
+ try{const p=JSON.parse($("studentProfile").value);$("studentName").value=p.name;$("studentClass").value=p.klass}catch{}
+};
+$("saveClassBtn").onclick=()=>{
+ const name=$("className").value.trim();
+ const students=[...new Set($("classStudents").value.split(/\n|,/).map(x=>x.trim()).filter(Boolean))];
+ if(!name)return alert("Bitte einen Klassennamen eingeben.");
+ const items=loadClasses(),editId=$("className").dataset.editId;
+ if(editId){
+  const item=items.find(x=>x.id===editId);if(item){item.name=name;item.students=students}
+ }else items.push({id:uid(),name,students});
+ saveClasses(items);$("className").value="";$("classStudents").value="";delete $("className").dataset.editId;renderClasses()
+};
+$("saveTemplateBtn").onclick=()=>{
+ const cfg=buildConfig(),items=loadTemplates();
+ items.unshift({id:uid(),createdAt:new Date().toISOString(),config:cfg});
+ saveTemplates(items);renderTemplates();alert("Testvorlage wurde gespeichert.")
+};
+renderClasses();renderTemplates();refreshProfiles();
+
 (function loadTestFromUrl(){
  const hash=location.hash.startsWith("#test=")?location.hash.slice(6):"";
  if(hash)applyLockedTest(b64Decode(hash))
