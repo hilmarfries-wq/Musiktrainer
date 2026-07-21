@@ -1,4 +1,4 @@
-# Musiktrainer Web-App 3.0
+# Musiktrainer Web-App 3.0.1
 
 Version 3.0 ist die erste Plattformversion des Musiktrainers.
 
@@ -32,3 +32,8 @@ Für zentrale Ergebnisse, echte Benutzerkonten und geräteübergreifende Klassen
 Die Dateien `index.html`, `app.js`, `styles.css` und `README.md` ersetzen.
 
 `config.js` wurde um die Versionsangabe ergänzt. Deine Lehrer-PIN kann dort weiterhin angepasst werden.
+
+
+## Fehlerkorrektur 3.0.1
+
+In Version 2.3 war beim Umbau der Notensystemgrafik versehentlich ein Teil der Aufgabenlogik entfernt worden. Version 3.0.1 stellt die vollständigen Aufgabenpools, die Auswertung und den Startvorgang wieder her. Die kompakteren Notensysteme sowie die Klassen- und Testbibliothek bleiben erhalten.

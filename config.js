@@ -1,6 +1,6 @@
 window.MUSIKTRAINER_CONFIG = {
   appName: "Musiktrainer",
-  appVersion: "3.0",
+  appVersion: "3.0.1",
   teacherPin: "2000",
   storageMode: "local",
 
