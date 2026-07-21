@@ -50,3 +50,21 @@ table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:11px 10p
 .locked-test #testBanner{display:block}
 @media(max-width:700px){.linkbox{grid-template-columns:1fr}}
 @media(max-width:820px){.grid,.module-grid,.answers,.metrics,.stats{grid-template-columns:1fr}.card{padding:18px}}
+
+.rhythm-svg{width:min(100%,650px);max-height:230px}
+.rhythm-svg text{fill:var(--ink)}
+
+.staff-svg{
+  display:block;
+  width:min(100%,680px);
+  height:auto;
+  max-height:300px;
+  margin:0 auto;
+}
+#visual{
+  padding:10px 12px;
+}
+@media(max-width:700px){
+  .staff-svg{width:100%;max-height:250px}
+  #visual{padding:6px}
+}

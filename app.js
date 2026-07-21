@@ -8,94 +8,70 @@ const $=id=>document.getElementById(id),shuffle=a=>[...a].sort(()=>Math.random()
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.panel).classList.add("active")});
 document.querySelectorAll(".module").forEach(m=>m.onclick=()=>{document.querySelectorAll(".module").forEach(x=>x.classList.remove("active"));m.classList.add("active");selectedModule=m.dataset.module;$("clefField").style.display=selectedModule==="pitch"?"block":"none";$("earTypeField").style.display=selectedModule==="ear"?"block":"none"});
 
-function grade(p){return p>=90?"1":p>=80?"2":p>=65?"3":p>=50?"4":p>=30?"5":"6"}
-function fmt(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
-function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
-function getResults(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch{return[]}}
-function saveResult(r){const d=getResults();d.push(r);localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
-function getWeak(){try{return JSON.parse(localStorage.getItem(WEAK_KEY))||{}}catch{return{}}}
-function bumpWeak(key){const w=getWeak();w[key]=(w[key]||0)+1;localStorage.setItem(WEAK_KEY,JSON.stringify(w))}
-function moduleName(m){return m==="pitch"?"Notenlesen":m==="rhythm"?"Rhythmus":m==="interval"?"Intervalle":"Gehörbildung"}
 
-const CLEFS={
-treble:{name:"Violinschlüssel",glyph:"𝄞",glyphX:105,glyphY:151,refMidi:64},
-bass:{name:"Bassschlüssel",glyph:"𝄢",glyphX:115,glyphY:144,refMidi:43},
-alto:{name:"Altschlüssel",glyph:"𝄡",glyphX:112,glyphY:146,refMidi:60},
-tenor:{name:"Tenorschlüssel",glyph:"𝄡",glyphX:112,glyphY:126,refMidi:57}
-};
-
-function staffStep(note,clef){return (note.midi-CLEFS[clef].refMidi)/1}
-function drawStaff(items,clef){
- const lines=[70,90,110,130,150],c=CLEFS[clef];
- const noteHtml=items.map((n,i)=>{const x=285+i*90,y=150-(n.diatonicOffset||0)*10;let ledger="";
- if(y<=50)for(let ly=50;ly>=y;ly-=20)ledger+=`<line x1="${x-32}" y1="${ly}" x2="${x+32}" y2="${ly}" stroke="#111" stroke-width="3"/>`;
- if(y>=170)for(let ly=170;ly<=y;ly+=20)ledger+=`<line x1="${x-32}" y1="${ly}" x2="${x+32}" y2="${ly}" stroke="#111" stroke-width="3"/>`;
- return `${ledger}<ellipse cx="${x}" cy="${y}" rx="17" ry="12" transform="rotate(-18 ${x} ${y})" fill="#111"/><line x1="${x+16}" y1="${y-2}" x2="${x+16}" y2="${y-66}" stroke="#111" stroke-width="4"/>`}).join("");
- return `<svg viewBox="0 0 620 220"><rect x="1" y="1" width="618" height="218" rx="18" fill="#fff"/>${lines.map(y=>`<line x1="90" y1="${y}" x2="550" y2="${y}" stroke="#111" stroke-width="3"/>`).join("")}<text x="${c.glyphX}" y="${c.glyphY}" font-size="100" font-family="serif">${c.glyph}</text>${noteHtml}</svg>`
-}
-function diatonicNumber(n){const map={c:0,d:1,e:2,f:3,g:4,a:5,h:6};return n.oct*7+map[n.name]}
-function offsetForClef(n,clef){
- const refs={treble:{name:"e",oct:3},bass:{name:"g",oct:2},alto:{name:"f",oct:3},tenor:{name:"d",oct:3}};
- return diatonicNumber(n)-diatonicNumber(refs[clef])
-}
-function noteOptions(correct,pool){const near=pool.filter(n=>n.id!==correct.id).sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi)).slice(0,7);return shuffle([correct.label,...shuffle(near).slice(0,3).map(n=>n.label)])}
-
-function pitchPool(){
- const diff=$("difficulty").value;let pool=NOTES.filter(n=>diff==="easy"?n.midi>=52&&n.midi<=67:diff==="medium"?n.midi>=48&&n.midi<=72:true);
- const clefSel=$("clefSelect").value, clefs=clefSel==="mixed"?["treble","bass","alto","tenor"]:[clefSel];
- let out=[];clefs.forEach(c=>pool.forEach(n=>out.push({type:"pitch",prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,correct:n.label,options:noteOptions(n,pool),clef:c,note:{...n,diatonicOffset:offsetForClef(n,c)},weakKey:`pitch:${c}:${n.id}`})));
- return out;
-}
-function rhythmPool(){
- const d=[
- ["Wie viele Viertelnoten entsprechen einer ganzen Note?","4",["2","3","4","8"],"𝅝 = ? × 𝅘𝅥"],
- ["Wie viele Achtelnoten entsprechen einer halben Note?","4",["2","3","4","8"],"𝅗𝅥 = ? × ♪"],
- ["Wie viele Schläge dauert eine punktierte halbe Note?","3",["1½","2","3","4"],"𝅗𝅥."],
- ["Welche Note dauert im 4/4-Takt einen Schlag?","Viertelnote",["Ganze Note","Halbe Note","Viertelnote","Achtelnote"],"4/4"],
- ["Wie viele Achtelnoten füllen einen 4/4-Takt?","8",["4","6","8","12"],"4/4"],
- ["Wie viele Sechzehntelnoten entsprechen einer Viertelnote?","4",["2","3","4","8"],"𝅘𝅥 = ? × 𝅘𝅥𝅯"],
- ["Eine punktierte Viertelnote dauert ...","1½ Schläge",["½ Schlag","1 Schlag","1½ Schläge","2 Schläge"],"𝅘𝅥."],
- ["Welche Taktart hat drei Viertelschläge?","3/4",["2/4","3/4","4/4","6/8"],"♩ ♩ ♩"],
- ["Wie viele halbe Noten passen in einen 4/4-Takt?","2",["1","2","3","4"],"4/4"],
- ["Welche Pause dauert einen ganzen 4/4-Takt?","Ganze Pause",["Halbe Pause","Ganze Pause","Viertelpause","Achtelpause"],"𝄻"]
- ];
- return d.map((x,i)=>({type:"rhythm",prompt:x[0],correct:x[1],options:x[2],display:x[3],weakKey:`rhythm:${i}`}))
-}
-function intervalPool(){
- const names={1:"Sekunde",2:"Terz",3:"Quarte",4:"Quinte",5:"Sexte",6:"Septime",7:"Oktave"},p=NOTES.filter(n=>n.midi>=52&&n.midi<=72),out=[];
- p.slice(0,8).forEach(a=>[1,2,3,4,5,7].forEach(dist=>{const ai=diatonicNumber(a),b=p.find(n=>diatonicNumber(n)-ai===dist);if(b){const vals=Object.values(names);out.push({type:"interval",prompt:"Welches Intervall ist notiert?",correct:names[dist],options:shuffle([names[dist],...shuffle(vals.filter(x=>x!==names[dist])).slice(0,3)]),clef:"treble",notes:[{...a,diatonicOffset:offsetForClef(a,"treble")},{...b,diatonicOffset:offsetForClef(b,"treble")}],weakKey:`interval:${dist}`})}}));
- return out
-}
-function earPool(){
- const type=$("earType").value, out=[];
- const tones=NOTES.filter(n=>n.midi>=60&&n.midi<=71);
- if(type==="tone"||type==="mixed") tones.forEach(n=>out.push({type:"ear-tone",prompt:"Welcher Ton erklingt?",correct:n.label,options:noteOptions(n,tones),midi:[n.midi],weakKey:`ear-tone:${n.id}`}));
- const intervals={2:"Sekunde",4:"Terz",5:"Quarte",7:"Quinte",9:"Sexte",12:"Oktave"};
- if(type==="interval"||type==="mixed") Object.entries(intervals).forEach(([semi,name])=>{const base=60;out.push({type:"ear-interval",prompt:"Welches Intervall hörst du?",correct:name,options:shuffle([name,...shuffle(Object.values(intervals).filter(x=>x!==name)).slice(0,3)]),midi:[base,base+Number(semi)],weakKey:`ear-int:${semi}`})});
- if(type==="chord"||type==="mixed") [["Dur",[60,64,67]],["Moll",[60,63,67]]].forEach(x=>out.push({type:"ear-chord",prompt:"Klingt der Akkord in Dur oder Moll?",correct:x[0],options:["Dur","Moll"],midi:x[1],simultaneous:true,weakKey:`ear-chord:${x[0]}`}));
- return out
-}
-function adaptivePick(pool,count){
- const weak=getWeak(),weighted=[];pool.forEach(q=>{const w=Math.min(4,1+(weak[q.weakKey]||0));for(let i=0;i<w;i++)weighted.push(q)});
- const result=[],used=new Set();while(result.length<count&&weighted.length){const q=weighted[Math.floor(Math.random()*weighted.length)];const key=q.weakKey+"-"+result.length;if(!used.has(q.weakKey)||pool.length<count){result.push(q);used.add(q.weakKey)}weighted.splice(weighted.indexOf(q),1)}
- return shuffle(result)
+function resolveStaffStep(note,clefKey){
+ if(Number.isFinite(note.staffStep))return note.staffStep;
+ if(Number.isFinite(note.step))return note.step;
+ if(Number.isFinite(note.pos))return note.pos;
+ return 0
 }
 
-function ensureAudio(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)()}
-function freq(m){return 440*Math.pow(2,(m-69)/12)}
-function playMidi(list,sim=false){
- ensureAudio();const now=audioCtx.currentTime+0.05;
- list.forEach((m,i)=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type="sine";osc.frequency.value=freq(m);gain.gain.setValueAtTime(0.0001,now+(sim?0:i*.75));gain.gain.exponentialRampToValueAtTime(.22,now+(sim?0:i*.75)+.03);gain.gain.exponentialRampToValueAtTime(.0001,now+(sim?0:i*.75)+.7);osc.connect(gain).connect(audioCtx.destination);osc.start(now+(sim?0:i*.75));osc.stop(now+(sim?0:i*.75)+.75)})
-}
+function staffSvg(note,clefKey){
+ const clef=CLEFS[clefKey]||CLEFS.treble;
+ const width=560,height=250;
+ const left=112,right=520;
+ const top=62,lineGap=25;
+ const lines=[0,1,2,3,4].map(i=>top+i*lineGap);
+ const centerY=top+2*lineGap;
 
-function renderQuestion(){
- locked=false;const q=queue[index];$("progressText").textContent=`Frage ${index+1} von ${queue.length}`;$("scoreText").textContent=`${score} Punkte`;$("progressFill").style.width=`${index/queue.length*100}%`;$("prompt").textContent=q.prompt;$("feedback").textContent="";
- if(q.type==="pitch")$("visual").innerHTML=drawStaff([q.note],q.clef);
- else if(q.type==="interval")$("visual").innerHTML=drawStaff(q.notes,q.clef);
- else if(q.type==="rhythm")$("visual").innerHTML=`<div style="font-size:clamp(2.2rem,8vw,4.7rem);letter-spacing:.16em">${q.display}</div>`;
- else $("visual").innerHTML=`<div class="audio-box"><button class="audio-btn" id="playAudio">▶ Hörbeispiel abspielen</button><p class="sub">Du kannst das Beispiel mehrfach anhören.</p></div>`;
- if(q.type.startsWith("ear")){$("playAudio").onclick=()=>playMidi(q.midi,q.simultaneous);setTimeout(()=>$("playAudio").click(),250)}
- $("answers").innerHTML="";q.options.forEach(opt=>{const b=document.createElement("button");b.className="answer";b.textContent=opt;b.onclick=()=>choose(b,opt,q);$("answers").appendChild(b)})
+ // Diatonische Position relativ zur Mittellinie des jeweiligen Schlüssels.
+ const step=resolveStaffStep(note,clefKey);
+ const noteY=centerY-step*(lineGap/2);
+
+ // Schlüsselgrößen und -positionen sind bewusst getrennt abgestimmt.
+ const clefLayout={
+  treble:{symbol:"𝄞",x:58,y:166,size:132},
+  bass:{symbol:"𝄢",x:65,y:132,size:92},
+  alto:{symbol:"𝄡",x:63,y:151,size:112},
+  tenor:{symbol:"𝄡",x:63,y:126,size:112}
+ };
+ const cl=clefLayout[clefKey]||clefLayout.treble;
+
+ let svg=`<svg class="staff-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Notensystem mit ${clef.name}">`;
+
+ // Staff lines
+ lines.forEach(y=>{
+  svg+=`<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="#182033" stroke-width="3.2" stroke-linecap="round"/>`;
+ });
+
+ // Clef
+ svg+=`<text x="${cl.x}" y="${cl.y}" font-size="${cl.size}" font-family="'Noto Music','Bravura Text','Segoe UI Symbol','Apple Symbols',serif" fill="#182033">${cl.symbol}</text>`;
+
+ // Ledger lines: one short line per staff-space outside the stave.
+ const noteX=350;
+ const ledgerHalf=28;
+ if(noteY < lines[0]){
+  for(let y=lines[0]-lineGap; y>=noteY-2; y-=lineGap){
+   svg+=`<line x1="${noteX-ledgerHalf}" y1="${y}" x2="${noteX+ledgerHalf}" y2="${y}" stroke="#182033" stroke-width="3.2" stroke-linecap="round"/>`;
+  }
+ }
+ if(noteY > lines[4]){
+  for(let y=lines[4]+lineGap; y<=noteY+2; y+=lineGap){
+   svg+=`<line x1="${noteX-ledgerHalf}" y1="${y}" x2="${noteX+ledgerHalf}" y2="${y}" stroke="#182033" stroke-width="3.2" stroke-linecap="round"/>`;
+  }
+ }
+
+ // Note head and stem
+ svg+=`<ellipse cx="${noteX}" cy="${noteY}" rx="18" ry="12" transform="rotate(-18 ${noteX} ${noteY})" fill="#182033"/>`;
+ const stemUp=noteY>=centerY;
+ if(stemUp){
+  svg+=`<line x1="${noteX+16}" y1="${noteY-2}" x2="${noteX+16}" y2="${noteY-72}" stroke="#182033" stroke-width="4.5" stroke-linecap="round"/>`;
+ }else{
+  svg+=`<line x1="${noteX-16}" y1="${noteY+2}" x2="${noteX-16}" y2="${noteY+72}" stroke="#182033" stroke-width="4.5" stroke-linecap="round"/>`;
+ }
+
+ svg+=`</svg>`;
+ return svg
 }
 function choose(button,sel,q){
  if(locked)return;locked=true;document.querySelectorAll(".answer").forEach(b=>b.disabled=true);

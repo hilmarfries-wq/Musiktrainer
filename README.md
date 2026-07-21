@@ -1,4 +1,4 @@
-# Musiktrainer Web-App
+# Musiktrainer Web-App 2.3
 
 Dies ist die neue Projektbasis des Musiktrainers. Die Anwendung ist nicht mehr in einer einzigen HTML-Datei gespeichert, sondern in getrennte Dateien gegliedert.
 
@@ -43,3 +43,20 @@ Die Ergebnisse werden weiterhin lokal im Browser gespeichert. Damit Ergebnisse v
 - QR-Code direkt im Lehrerbereich
 - Bearbeitungszeit und Testfreigabe
 - Aufgabenbibliothek
+
+
+## Änderung in Version 2.2
+
+Die Rhythmuszeichen werden nicht mehr als Unicode-Zeichen dargestellt. Ganze, halbe, Viertel-, Achtel- und Sechzehntelnoten, Punktierungen sowie Pausen werden nun direkt als SVG gezeichnet. Dadurch ist die Darstellung insbesondere auf iPads und in Safari unabhängig von installierten Musikschriftarten.
+
+
+## Änderung in Version 2.3
+
+Die Darstellung des Notenlese-Moduls wurde neu abgestimmt:
+
+- kompakterer Abstand der fünf Notenlinien
+- deutlich größere und passend ausgerichtete Notenschlüssel
+- eigene Größen für Violin-, Bass-, Alt- und Tenorschlüssel
+- näher zusammengerückte Anordnung von Schlüssel, System und Note
+- proportional passende Hilfslinien
+- verbesserte Skalierung auf iPad, Smartphone und Desktop
