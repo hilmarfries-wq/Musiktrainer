@@ -1,32 +1,28 @@
-# Musiktrainer Web-App 3.1
+# Musiktrainer Web-App 3.2
 
-## Neue Testinhalte
+Version 3.2 konzentriert sich auf direkt einsetzbare und automatisch benotete Testmodule.
 
-### Notenlesen mit Vorzeichen
-- ohne Vorzeichen
-- einzelne Kreuze und Be-Zeichen
-- gemischte Aufgaben mit Auflösungszeichen
-- deutsche Notennamen einschließlich H und B
-- Vorzeichen als feste SVG-Vektorgrafik
-
-### Skalen
-- Dur- und Molltonleitern
-- Tonleiter anhand der Tonfolge erkennen
-- Vorzeichen bestimmen
-- Paralleltonarten zuordnen
+## Neu: Tonarten
+- Vorzeichen von Durtonarten
+- Dur-/Moll-Paralleltonarten
+- Quintenzirkel
 - gestaffelte Schwierigkeit
 
-### Dreiklänge
-- Dur, Moll und vermindert erkennen
-- Grundton bestimmen
-- in der erweiterten Stufe Grundstellung und Umkehrungen erkennen
-- Darstellung direkt im Notensystem
+## Neu: Harmonielehre
+- Tonika, Subdominante und Dominante
+- Dreiklänge auf Tonleiterstufen
+- Dreiklangsaufbau aus Terzen
+- Grundstellung und Umkehrungen
+- Tonika-Dreiklänge zusammensetzen
 
-## Unverändert enthalten
-Rhythmus, Intervalle, Gehörbildung, Klassenverwaltung, Testbibliothek, Testlinks, CSV-Export und lokale Ergebnisspeicherung.
+## Rhythmus erweitert
+- Takte vervollständigen
+- gleichwertige Notenwerte
+- 6/8-Takt
+- punktierte Noten
+- Synkopen in der erweiterten Stufe
+
+Alle Aufgaben werden mit Punkten, Prozentwert, deutscher Schulnote und Fehlerübersicht ausgewertet. Die neuen Module stehen auch im Lehrer-Testgenerator zur Verfügung.
 
 ## Installation
-Die Dateien aus dem ZIP in das Hauptverzeichnis des GitHub-Repositories hochladen und die vorhandenen Dateien ersetzen. `config.js` enthält weiterhin die Lehrer-PIN.
-
-## Hinweis
-Rhythmus-Nachklopfen ist für Version 3.2 vorgesehen, da dafür eine eigene Timing- und Touch-Auswertung nötig ist.
+Alle Dateien in das Hauptverzeichnis des GitHub-Repositorys laden und vorhandene Dateien ersetzen. Die Lehrer-PIN bleibt in `config.js` einstellbar.

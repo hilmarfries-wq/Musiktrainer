@@ -22,7 +22,11 @@ function getResults(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||
 function saveResult(r){const d=getResults();d.push(r);localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 function getWeak(){try{return JSON.parse(localStorage.getItem(WEAK_KEY))||{}}catch{return{}}}
 function bumpWeak(key){const w=getWeak();w[key]=(w[key]||0)+1;localStorage.setItem(WEAK_KEY,JSON.stringify(w))}
-function moduleName(m){return m==="pitch"?"Notenlesen":m==="rhythm"?"Rhythmus":m==="interval"?"Intervalle":m==="ear"?"Gehörbildung":m==="scale"?"Skalen":"Dreiklänge"}
+function moduleName(m){
+ return m==="pitch"?"Notenlesen":m==="rhythm"?"Rhythmus":m==="interval"?"Intervalle":
+ m==="ear"?"Gehörbildung":m==="scale"?"Skalen":m==="triad"?"Dreiklänge":
+ m==="key"?"Tonarten":"Harmonielehre"
+}
 
 const CLEFS={
 treble:{name:"Violinschlüssel",glyph:"𝄞",glyphX:105,glyphY:151,refMidi:64},
@@ -49,9 +53,14 @@ function clefSvg(clef){
 function accidentalSvg(kind,x,y){
  if(!kind)return "";
  const path=MUSIC_ACCIDENTAL_PATHS[kind];
- const scale=kind==="flat"?0.034:0.031;
- const yShift=kind==="flat"?y+20:y+18;
- return `<path d="${path}" transform="translate(${x} ${yShift}) scale(${scale} -${scale})" fill="#182033"/>`;
+ // Larger accidentals for clear display on tablets and phones.
+ const settings={
+  sharp:{scale:0.050,x:-49,y:27},
+  flat:{scale:0.052,x:-47,y:31},
+  natural:{scale:0.048,x:-48,y:27}
+ };
+ const s=settings[kind]||settings.natural;
+ return `<path d="${path}" transform="translate(${x+s.x} ${y+s.y}) scale(${s.scale} -${s.scale})" fill="#182033"/>`;
 }
 function drawStaff(items,clef){
  const c=CLEFS[clef];
@@ -138,9 +147,23 @@ function rhythmPool(){
  {prompt:"Wie viele halbe Noten passen in einen 4/4-Takt?",correct:"2",options:["1","2","3","4"],visual:{kind:"time",top:4,bottom:4}},
  {prompt:"Welche Pause dauert einen ganzen 4/4-Takt?",correct:"Ganze Pause",options:["Halbe Pause","Ganze Pause","Viertelpause","Achtelpause"],visual:{kind:"rest",rest:"whole"}}
  ];
- return d.map((x,i)=>({type:"rhythm",prompt:x.prompt,correct:x.correct,options:x.options,visual:x.visual,weakKey:`rhythm:${i}`}))
+ const out=d.map((x,i)=>({type:"rhythm",prompt:x.prompt,correct:x.correct,options:x.options,visual:x.visual,weakKey:`rhythm:${i}`}));
+ out.push(
+  theoryQuestion("Wie viele Viertelschläge enthält ein 3/4-Takt?","3",["2","3","4","6"],"3/4-Takt","rhythm:beats:3-4"),
+  theoryQuestion("Welcher Notenwert ergänzt zwei Viertelnoten im 4/4-Takt?","eine halbe Note",["eine Achtelnote","eine Viertelnote","eine halbe Note","eine ganze Note"],"♩ + ♩ + ? = 4/4","rhythm:complete:4-4"),
+  theoryQuestion("Wie viele Achtelnoten passen in einen 3/4-Takt?","6",["3","4","6","8"],"3/4-Takt","rhythm:eighths:3-4"),
+  theoryQuestion("Welche Taktart hat drei Viertelschläge pro Takt?","3/4",["2/4","3/4","4/4","6/8"],"drei Viertelschläge","rhythm:meter:3-4")
+ );
+ if($("difficulty").value!=="easy")out.push(
+  theoryQuestion("Welche Note dauert drei Achtelschläge?","punktierte Viertelnote",["Viertelnote","punktierte Viertelnote","halbe Note","punktierte halbe Note"],"3 Achtelschläge","rhythm:dotted:quarter"),
+  theoryQuestion("Wie viele Achtelschläge enthält ein 6/8-Takt?","6",["3","4","6","8"],"6/8-Takt","rhythm:beats:6-8")
+ );
+ if($("difficulty").value==="hard")out.push(
+  theoryQuestion("Wo entsteht bei Viertel–Halbe–Viertel die Synkope?","Die halbe Note beginnt auf 2",["Die halbe Note beginnt auf 1","Die halbe Note beginnt auf 2","Die halbe Note beginnt auf 3","Es gibt keine Synkope"],"Viertel – Halbe – Viertel","rhythm:syncopation"),
+  theoryQuestion("Welche Taktart wird meist in zwei punktierten Vierteln empfunden?","6/8",["2/4","3/4","4/4","6/8"],"zusammengesetzter Zweiertakt","rhythm:compound")
+ );
+ return out
 }
-
 function rhythmNoteSvg(type,{x=90,y=105,dotted=false}={}){
  const filled=type==="quarter"||type==="eighth"||type==="sixteenth";
  const hasStem=type!=="whole";
@@ -272,6 +295,64 @@ function triadPool(){
  return out
 }
 
+const KEY_SIGNATURES=[
+ {major:"C-Dur",minor:"a-Moll",count:0,kind:"keine",names:"keine"},
+ {major:"G-Dur",minor:"e-Moll",count:1,kind:"Kreuz",names:"fis"},
+ {major:"D-Dur",minor:"h-Moll",count:2,kind:"Kreuze",names:"fis, cis"},
+ {major:"A-Dur",minor:"fis-Moll",count:3,kind:"Kreuze",names:"fis, cis, gis"},
+ {major:"E-Dur",minor:"cis-Moll",count:4,kind:"Kreuze",names:"fis, cis, gis, dis"},
+ {major:"F-Dur",minor:"d-Moll",count:1,kind:"Be",names:"b"},
+ {major:"B-Dur",minor:"g-Moll",count:2,kind:"Be",names:"b, es"},
+ {major:"Es-Dur",minor:"c-Moll",count:3,kind:"Be",names:"b, es, as"},
+ {major:"As-Dur",minor:"f-Moll",count:4,kind:"Be",names:"b, es, as, des"}
+];
+function theoryQuestion(prompt,correct,options,label,key){
+ return {type:"theory",prompt,correct,options:shuffle([...new Set(options)]),display:label,weakKey:key}
+}
+function keyPool(){
+ const diff=$("difficulty").value;
+ const rows=diff==="easy"?KEY_SIGNATURES.filter(k=>k.count<=2):diff==="medium"?KEY_SIGNATURES.filter(k=>k.count<=3):KEY_SIGNATURES;
+ const majors=rows.map(k=>k.major),minors=rows.map(k=>k.minor),out=[];
+ rows.forEach(k=>{
+  const sig=k.count===0?"keine Vorzeichen":`${k.count} ${k.kind}: ${k.names}`;
+  const otherSigs=[...new Set(rows.map(x=>x.count===0?"keine Vorzeichen":`${x.count} ${x.kind}: ${x.names}`).filter(x=>x!==sig))];
+  out.push(theoryQuestion(`Welche Vorzeichen hat ${k.major}?`,sig,[sig,...shuffle(otherSigs).slice(0,3)],k.major,`key:signature:${k.major}`));
+  out.push(theoryQuestion(`Welche Molltonart ist die Paralleltonart von ${k.major}?`,k.minor,[k.minor,...shuffle(minors.filter(x=>x!==k.minor)).slice(0,3)],`${k.major} ↔ ?`,`key:parallel:${k.major}`));
+  out.push(theoryQuestion(`Welche Durtonart ist die Paralleltonart von ${k.minor}?`,k.major,[k.major,...shuffle(majors.filter(x=>x!==k.major)).slice(0,3)],`${k.minor} ↔ ?`,`key:parallel:${k.minor}`));
+ });
+ if(diff!=="easy"){
+  [["C-Dur","G-Dur"],["G-Dur","D-Dur"],["D-Dur","A-Dur"],["C-Dur","F-Dur"],["F-Dur","B-Dur"],["B-Dur","Es-Dur"]]
+   .forEach(([from,to])=>out.push(theoryQuestion(`Welche Tonart liegt im Quintenzirkel direkt neben ${from}?`,to,[to,...shuffle(majors.filter(x=>x!==to&&x!==from)).slice(0,3)],"Quintenzirkel",`key:circle:${from}:${to}`)));
+ }
+ return out
+}
+const HARMONY_KEYS=[
+ {key:"C-Dur",tones:["c","d","e","f","g","a","h"],triads:["C-Dur","d-Moll","e-Moll","F-Dur","G-Dur","a-Moll","h-vermindert"]},
+ {key:"G-Dur",tones:["g","a","h","c","d","e","fis"],triads:["G-Dur","a-Moll","h-Moll","C-Dur","D-Dur","e-Moll","fis-vermindert"]},
+ {key:"F-Dur",tones:["f","g","a","b","c","d","e"],triads:["F-Dur","g-Moll","a-Moll","B-Dur","C-Dur","d-Moll","e-vermindert"]}
+];
+function harmonyPool(){
+ const diff=$("difficulty").value,out=[];
+ const functionNames={1:"Tonika",4:"Subdominante",5:"Dominante"};
+ HARMONY_KEYS.forEach(k=>{
+  [1,4,5].forEach(degree=>{
+   const i=degree-1,correct=k.triads[i];
+   out.push(theoryQuestion(`Welcher Dreiklang steht in ${k.key} auf der ${degree}. Stufe?`,correct,[correct,...shuffle(k.triads.filter((_,j)=>j!==i)).slice(0,3)],`${k.key} · ${degree}. Stufe`,`harmony:degree:${k.key}:${degree}`));
+   out.push(theoryQuestion(`Welche harmonische Funktion hat die ${degree}. Stufe in Dur?`,functionNames[degree],[functionNames[degree],...["Tonika","Subdominante","Dominante","Mollparallele"].filter(x=>x!==functionNames[degree])],`${degree}. Stufe`,`harmony:function:${degree}`));
+  });
+  const tonic=`${k.tones[0]} – ${k.tones[2]} – ${k.tones[4]}`;
+  out.push(theoryQuestion(`Welche drei Töne bilden den Tonika-Dreiklang in ${k.key}?`,tonic,[tonic,`${k.tones[0]} – ${k.tones[1]} – ${k.tones[4]}`,`${k.tones[0]} – ${k.tones[3]} – ${k.tones[4]}`,`${k.tones[1]} – ${k.tones[3]} – ${k.tones[5]}`],`${k.key}: Tonika`,`harmony:build:${k.key}`));
+ });
+ const qualities=[["große Terz + kleine Terz","Dur"],["kleine Terz + große Terz","Moll"],["kleine Terz + kleine Terz","vermindert"],["große Terz + große Terz","übermäßig"]];
+ const allowed=diff==="easy"?qualities.slice(0,2):diff==="medium"?qualities.slice(0,3):qualities;
+ allowed.forEach(([structure,quality])=>out.push(theoryQuestion(`Welcher Dreiklang besteht aus ${structure}?`,quality,[quality,...allowed.map(x=>x[1]).filter(x=>x!==quality)],structure,`harmony:quality:${quality}`)));
+ if(diff==="hard"){
+  [["Quintton im Bass","2. Umkehrung"],["Terzton im Bass","1. Umkehrung"],["Grundton im Bass","Grundstellung"]]
+   .forEach(([bass,position])=>out.push(theoryQuestion(`Welche Lage liegt vor, wenn der ${bass} liegt?`,position,[position,...["Grundstellung","1. Umkehrung","2. Umkehrung"].filter(x=>x!==position)],bass,`harmony:inversion:${position}`)));
+ }
+ return out
+}
+
 function adaptivePick(pool,count){
  const weak=getWeak(),weighted=[];pool.forEach(q=>{const w=Math.min(4,1+(weak[q.weakKey]||0));for(let i=0;i<w;i++)weighted.push(q)});
  const result=[],used=new Set();while(result.length<count&&weighted.length){const q=weighted[Math.floor(Math.random()*weighted.length)];const key=q.weakKey+"-"+result.length;if(!used.has(q.weakKey)||pool.length<count){result.push(q);used.add(q.weakKey)}weighted.splice(weighted.indexOf(q),1)}
@@ -300,6 +381,7 @@ function renderQuestion(){
  else if(q.type==="rhythm")$("visual").innerHTML=rhythmVisualSvg(q.visual);
  else if(q.type==="scale"||q.type==="scale-text")$("visual").innerHTML=scaleVisual(q);
  else if(q.type==="triad")$("visual").innerHTML=drawStaff(q.notes,q.clef);
+ else if(q.type==="theory")$("visual").innerHTML=`<div class="theory-question-card">${esc(q.display||"Musiklehre")}</div>`;
  else $("visual").innerHTML=`<div class="audio-box"><button class="audio-btn" id="playAudio">▶ Hörbeispiel abspielen</button><p class="sub">Du kannst das Beispiel mehrfach anhören.</p></div>`;
  if(q.type.startsWith("ear")){$("playAudio").onclick=()=>playMidi(q.midi,q.simultaneous);setTimeout(()=>$("playAudio").click(),250)}
  $("answers").innerHTML="";q.options.forEach(opt=>{const b=document.createElement("button");b.className="answer";b.textContent=opt;b.onclick=()=>choose(b,opt,q);$("answers").appendChild(b)})
@@ -326,7 +408,7 @@ function finish(){
  saveResult({timestamp:new Date().toISOString(),name,klass,module:moduleName(selectedModule),config,score,total:queue.length,percent,grade:g,seconds:secs,mistakes})
 }
 $("startBtn").onclick=()=>{if(selectedModule==="ear")ensureAudio();
- const pools={pitch:pitchPool,rhythm:rhythmPool,interval:intervalPool,ear:earPool,scale:scalePool,triad:triadPool};
+ const pools={pitch:pitchPool,rhythm:rhythmPool,interval:intervalPool,ear:earPool,scale:scalePool,triad:triadPool,key:keyPool,harmony:harmonyPool};
  let pool=pools[selectedModule]();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";renderQuestion()};
 
 function renderResults(){
@@ -338,7 +420,7 @@ function renderResults(){
 $("loginBtn").onclick=()=>{if($("teacherPin").value===TEACHER_PIN){$("teacherLogin").style.display="none";$("teacherDashboard").style.display="block";renderResults();renderClasses();renderTemplates()}else alert("PIN ist nicht korrekt.")};
 $("clearBtn").onclick=()=>{if(confirm("Alle lokal gespeicherten Ergebnisse löschen?")){localStorage.removeItem(STORAGE_KEY);renderResults()}};
 function download(content,name,type){const b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
-$("exportBtn").onclick=()=>{const d=getResults();if(!d.length)return alert("Keine Ergebnisse vorhanden.");const rows=[["Datum","Name","Klasse","Modul","Konfiguration","Punkte","Gesamt","Prozent","Note","Zeit Sekunden","Fehler"],...d.map(r=>[r.timestamp,r.name,r.klass,r.module,r.config,r.score,r.total,r.percent,r.grade,r.seconds,r.mistakes.join(" | ")])];download("\ufeff"+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n"),"Musiktrainer_2_Ergebnisse.csv","text/csv")};
+$("exportBtn").onclick=()=>{const d=getResults();if(!d.length)return alert("Keine Ergebnisse vorhanden.");const rows=[["Datum","Name","Klasse","Modul","Konfiguration","Punkte","Gesamt","Prozent","Note","Zeit Sekunden","Fehler"],...d.map(r=>[r.timestamp,r.name,r.klass,r.module,r.config,r.score,r.total,r.percent,r.grade,r.seconds,r.mistakes.join(" | ")])];download("\ufeff"+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n"),"Musiktrainer_3_2_Ergebnisse.csv","text/csv")};
 $("backupBtn").onclick=()=>download(JSON.stringify({results:getResults(),weak:getWeak()},null,2),"Musiktrainer_2_Sicherung.json","application/json");
 $("importBtn").onclick=()=>$("importFile").click();
 $("importFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);localStorage.setItem(STORAGE_KEY,JSON.stringify(d.results||[]));localStorage.setItem(WEAK_KEY,JSON.stringify(d.weak||{}));renderResults();alert("Sicherung importiert.")}catch{alert("Ungültige Sicherungsdatei.")}};r.readAsText(f)};
@@ -394,7 +476,7 @@ $("copyLinkBtn").onclick=async()=>{
 $("previewTestBtn").onclick=()=>window.open(makeTestLink(),"_blank");
 
 function applyLockedTest(cfg){
- if(!cfg||!["pitch","rhythm","interval","ear","scale","triad"].includes(cfg.module))return;
+ if(!cfg||!["pitch","rhythm","interval","ear","scale","triad","key","harmony"].includes(cfg.module))return;
  lockedConfig=cfg;selectedModule=cfg.module;
  document.body.classList.add("locked-test");
  $("lockedTestTitle").textContent=cfg.title||"Vorbereiteter Test";

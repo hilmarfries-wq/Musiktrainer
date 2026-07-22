@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Musiktrainer Web-App 3.1</title>
+<title>Musiktrainer Web-App 3.2</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app"><div class="card">
 <div class="header">
-<div><h1>🎼 Musiktrainer Web-App 3.1</h1><p class="sub">Notenlesen mit Vorzeichen, Rhythmus, Skalen, Dreiklänge und Gehörbildung</p></div>
+<div><h1>🎼 Musiktrainer Web-App 3.2</h1><p class="sub">Notenlesen mit Vorzeichen, Rhythmus, Skalen, Dreiklänge und Gehörbildung</p></div>
 <div class="badge">GitHub-Pages-fähig</div>
 </div>
 
@@ -39,6 +39,8 @@
 <div class="module" data-module="ear"><h3>🎧 Gehörbildung</h3><p>Töne, Intervalle sowie Dur und Moll hören</p></div>
 <div class="module" data-module="scale"><h3>🎶 Skalen</h3><p>Dur, Moll, Vorzeichen und Paralleltonarten</p></div>
 <div class="module" data-module="triad"><h3>🎹 Dreiklänge</h3><p>Dur, Moll, vermindert und Umkehrungen</p></div>
+<div class="module" data-module="key"><h3>🔑 Tonarten</h3><p>Vorzeichen, Paralleltonarten und Quintenzirkel</p></div>
+<div class="module" data-module="harmony"><h3>🧩 Harmonielehre</h3><p>Stufen, Funktionen und Dreiklangsaufbau</p></div>
 </div>
 
 <div class="grid">
@@ -106,7 +108,7 @@
 <div class="grid" style="margin-top:16px">
 <div class="field"><label>Testname</label><input id="builderTitle" value="Musiktest" placeholder="z. B. Notenlesen 7a"></div>
 <div class="field"><label>Voreingestellte Klasse</label><input id="builderClass" placeholder="z. B. 7a"></div>
-<div class="field"><label>Modul</label><select id="builderModule"><option value="pitch">Notenlesen</option><option value="rhythm">Rhythmus</option><option value="interval">Intervalle</option><option value="ear">Gehörbildung</option><option value="scale">Skalen</option><option value="triad">Dreiklänge</option></select></div>
+<div class="field"><label>Modul</label><select id="builderModule"><option value="pitch">Notenlesen</option><option value="rhythm">Rhythmus</option><option value="interval">Intervalle</option><option value="ear">Gehörbildung</option><option value="scale">Skalen</option><option value="triad">Dreiklänge</option><option value="key">Tonarten</option><option value="harmony">Harmonielehre</option></select></div>
 <div class="field"><label>Fragenzahl</label><select id="builderCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
 <div class="field" id="builderAccidentalField"><label>Vorzeichen beim Notenlesen</label><select id="builderAccidental"><option value="none">Ohne Vorzeichen</option><option value="single" selected>Einzelne Vorzeichen</option><option value="mixed">Gemischt mit Auflösungszeichen</option></select></div>
 <div class="field" id="builderClefField"><label>Notenschlüssel</label><select id="builderClef"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="mixed">Gemischt</option></select></div>
@@ -143,11 +145,11 @@
 </section>
 
 <section id="aboutPanel" class="panel">
-<h2>Version 3.1</h2>
+<h2>Version 3.2</h2>
 <p>Version 3.1 ergänzt Vorzeichen beim Notenlesen sowie neue Tests zu Skalen und Dreiklängen.</p>
 <p class="sub">Klassen, Profile, Testvorlagen und Ergebnisse werden momentan auf dem jeweiligen Gerät gespeichert. Für geräteübergreifende Konten und eine zentrale Ergebnisübertragung wird später eine Cloud-Datenbank verbunden.</p>
 </section>
-<div class="footer">Musiktrainer Web-App 3.1 · Vorzeichen, Skalen und Dreiklänge · GitHub Pages</div>
+<div class="footer">Musiktrainer Web-App 3.2 · Neue benotete Testmodule · GitHub Pages</div>
 </div></div>
 
 <script src="config.js"></script>
