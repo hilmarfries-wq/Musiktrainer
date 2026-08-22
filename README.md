@@ -1,7 +1,5 @@
-# Musiktrainer Web-App 3.2.2
+# Musiktrainer Web-App 3.2.3
 
-## Korrektur Notenlesen
+## Korrektur Vorzeichen
 
-Die Vorzeichen im Notenlesen werden nun exakt an der vertikalen Position des zugehörigen Notenkopfes verankert.
-
-Kreuz, Be und Auflösungszeichen erhalten nur noch kleine optische Korrekturen innerhalb derselben Tonhöhe. Dadurch stehen Vorzeichen und Note im Notensystem zuverlässig auf derselben Höhe.
+Kreuz, Be und Auflösungszeichen werden anhand ihrer tatsächlichen Glyphen-Grenzen zentriert. Dadurch sitzt die sichtbare Mitte des Vorzeichens exakt auf derselben vertikalen Position wie der zugehörige Notenkopf.
