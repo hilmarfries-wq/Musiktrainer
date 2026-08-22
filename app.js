@@ -52,38 +52,30 @@ function clefSvg(clef){
 }
 function accidentalSvg(kind,x,y){
  if(!kind)return "";
-
  const cx=x-46;
 
  if(kind==="sharp"){
-  return `
-   <g stroke="#182033" stroke-width="3.8" stroke-linecap="round">
-    <line x1="${cx-7}" y1="${y-18}" x2="${cx-7}" y2="${y+18}"/>
-    <line x1="${cx+7}" y1="${y-21}" x2="${cx+7}" y2="${y+15}"/>
-    <line x1="${cx-15}" y1="${y-7}" x2="${cx+15}" y2="${y-11}"/>
-    <line x1="${cx-15}" y1="${y+7}" x2="${cx+15}" y2="${y+3}"/>
-   </g>`;
+  return `<g stroke="#182033" stroke-width="3.8" stroke-linecap="round">
+   <line x1="${cx-7}" y1="${y-18}" x2="${cx-7}" y2="${y+18}"/>
+   <line x1="${cx+7}" y1="${y-21}" x2="${cx+7}" y2="${y+15}"/>
+   <line x1="${cx-15}" y1="${y-7}" x2="${cx+15}" y2="${y-11}"/>
+   <line x1="${cx-15}" y1="${y+7}" x2="${cx+15}" y2="${y+3}"/>
+  </g>`;
  }
-
  if(kind==="flat"){
-  return `
-   <g fill="none" stroke="#182033" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="${cx-5}" y1="${y-25}" x2="${cx-5}" y2="${y+20}"/>
-    <path d="M ${cx-5} ${y-2}
-             C ${cx+16} ${y-16}, ${cx+18} ${y+3}, ${cx-5} ${y+17}"/>
-   </g>`;
+  return `<g fill="none" stroke="#182033" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round">
+   <line x1="${cx-5}" y1="${y-25}" x2="${cx-5}" y2="${y+20}"/>
+   <path d="M ${cx-5} ${y-2} C ${cx+16} ${y-16}, ${cx+18} ${y+3}, ${cx-5} ${y+17}"/>
+  </g>`;
  }
-
  if(kind==="natural"){
-  return `
-   <g fill="none" stroke="#182033" stroke-width="3.8" stroke-linecap="round">
-    <line x1="${cx-8}" y1="${y-20}" x2="${cx-8}" y2="${y+15}"/>
-    <line x1="${cx+8}" y1="${y-15}" x2="${cx+8}" y2="${y+20}"/>
-    <line x1="${cx-8}" y1="${y-4}" x2="${cx+8}" y2="${y-9}"/>
-    <line x1="${cx-8}" y1="${y+9}" x2="${cx+8}" y2="${y+4}"/>
-   </g>`;
+  return `<g fill="none" stroke="#182033" stroke-width="3.8" stroke-linecap="round">
+   <line x1="${cx-8}" y1="${y-20}" x2="${cx-8}" y2="${y+15}"/>
+   <line x1="${cx+8}" y1="${y-15}" x2="${cx+8}" y2="${y+20}"/>
+   <line x1="${cx-8}" y1="${y-4}" x2="${cx+8}" y2="${y-9}"/>
+   <line x1="${cx-8}" y1="${y+9}" x2="${cx+8}" y2="${y+4}"/>
+  </g>`;
  }
-
  return "";
 }
 function drawStaff(items,clef){
@@ -255,9 +247,9 @@ function earPool(){
      reference:{name:ref.name,midi:ref.midi},
      target:{name:targetName,midi:targetMidi},
      weakKey:`ear-relative:${ref.name}:${targetName}`
-    })
-   })
-  })
+    });
+   });
+  });
  }
 
  const intervals={2:"Sekunde",3:"kleine Terz",4:"große Terz",5:"Quarte",7:"Quinte",8:"kleine Sexte",9:"große Sexte",12:"Oktave"};
@@ -268,8 +260,8 @@ function earPool(){
     type:"ear-interval",prompt:"Welches Intervall hörst du?",correct:name,
     options:shuffle([name,...shuffle(Object.values(intervals).filter(x=>x!==name)).slice(0,3)]),
     midi:[base,base+Number(semi)],weakKey:`ear-int:${semi}`
-   })
-  })
+   });
+  });
  }
 
  if(type==="chord"||type==="mixed"){
@@ -278,10 +270,144 @@ function earPool(){
     type:"ear-chord",prompt:"Welches Tongeschlecht hörst du?",correct:x[0],
     options:["Dur","Moll","Vermindert","Übermäßig"],midi:x[1],simultaneous:true,
     weakKey:`ear-chord:${x[0]}`
-   }))
+   }));
+ }
+ return out;
+}
+
+const SCALE_DATA=[
+ {name:"C-Dur",notes:["c","d","e","f","g","a","h","c"],signs:"keine",parallel:"a-Moll"},
+ {name:"G-Dur",notes:["g","a","h","c","d","e","fis","g"],signs:"1 Kreuz: fis",parallel:"e-Moll"},
+ {name:"D-Dur",notes:["d","e","fis","g","a","h","cis","d"],signs:"2 Kreuze: fis, cis",parallel:"h-Moll"},
+ {name:"F-Dur",notes:["f","g","a","b","c","d","e","f"],signs:"1 Be: b",parallel:"d-Moll"},
+ {name:"B-Dur",notes:["b","c","d","es","f","g","a","b"],signs:"2 Be: b, es",parallel:"g-Moll"},
+ {name:"a-Moll",notes:["a","h","c","d","e","f","g","a"],signs:"keine",parallel:"C-Dur"},
+ {name:"e-Moll",notes:["e","fis","g","a","h","c","d","e"],signs:"1 Kreuz: fis",parallel:"G-Dur"},
+ {name:"d-Moll",notes:["d","e","f","g","a","b","c","d"],signs:"1 Be: b",parallel:"F-Dur"}
+];
+function scaleVisual(q){
+ return `<div class="theory-card"><div class="tone-row">${q.display.map(n=>`<span>${n}</span>`).join("")}</div></div>`
+}
+function scalePool(){
+ const diff=$("difficulty").value;
+ const data=diff==="easy"?SCALE_DATA.filter(s=>["C-Dur","G-Dur","F-Dur","a-Moll"].includes(s.name)):diff==="medium"?SCALE_DATA:SCALE_DATA;
+ const names=data.map(s=>s.name),out=[];
+ data.forEach(s=>{
+  out.push({type:"scale",prompt:"Welche Tonleiter ist dargestellt?",correct:s.name,
+   options:shuffle([s.name,...shuffle(names.filter(x=>x!==s.name)).slice(0,3)]),display:s.notes,
+   weakKey:`scale:name:${s.name}`});
+  out.push({type:"scale-text",prompt:`Welche Vorzeichen hat ${s.name}?`,correct:s.signs,
+   options:shuffle([s.signs,...shuffle([...new Set(data.map(x=>x.signs).filter(x=>x!==s.signs))]).slice(0,3)]),
+   display:[s.name],weakKey:`scale:signs:${s.name}`});
+  if(diff!=="easy")out.push({type:"scale-text",prompt:`Welche Paralleltonart gehört zu ${s.name}?`,correct:s.parallel,
+   options:shuffle([s.parallel,...shuffle(names.filter(x=>x!==s.parallel)).slice(0,3)]),
+   display:[s.name],weakKey:`scale:parallel:${s.name}`});
+ });
+ return out
+}
+const TRIAD_DATA=[
+ {root:"C",quality:"Dur",notes:["c","e","g"],midi:[60,64,67]},
+ {root:"D",quality:"Moll",notes:["d","f","a"],midi:[62,65,69]},
+ {root:"E",quality:"Moll",notes:["e","g","h"],midi:[64,67,71]},
+ {root:"F",quality:"Dur",notes:["f","a","c"],midi:[65,69,72]},
+ {root:"G",quality:"Dur",notes:["g","h","d"],midi:[67,71,74]},
+ {root:"A",quality:"Moll",notes:["a","c","e"],midi:[57,60,64]},
+ {root:"H",quality:"Vermindert",notes:["h","d","f"],midi:[59,62,65]}
+];
+function noteFromMidi(midi,name){
+ const oct=Math.floor(midi/12)-1;
+ return {name:name.toLowerCase(),oct,midi,label:name.toLowerCase(),diatonicOffset:0}
+}
+function triadPool(){
+ const diff=$("difficulty").value,out=[];
+ TRIAD_DATA.forEach(t=>{
+  const notes=t.midi.map((m,i)=>{const n=noteFromMidi(m,t.notes[i]);return {...n,diatonicOffset:offsetForClef(n,"treble")}});
+  out.push({type:"triad",prompt:"Welches Tongeschlecht hat dieser Dreiklang?",correct:t.quality,
+   options:diff==="easy"?["Dur","Moll"]:["Dur","Moll","Vermindert","Übermäßig"],
+   clef:"treble",notes,weakKey:`triad:quality:${t.root}:${t.quality}`});
+  if(diff!=="easy")out.push({type:"triad",prompt:"Welcher Grundton gehört zu diesem Dreiklang?",correct:t.root,
+   options:shuffle([t.root,...shuffle(TRIAD_DATA.map(x=>x.root).filter(x=>x!==t.root)).slice(0,3)]),
+   clef:"treble",notes,weakKey:`triad:root:${t.root}`});
+ });
+ if(diff==="hard"){
+  const inversions=[
+   {name:"Grundstellung",order:[0,1,2]},
+   {name:"1. Umkehrung",order:[1,2,0]},
+   {name:"2. Umkehrung",order:[2,0,1]}
+  ];
+  TRIAD_DATA.filter(t=>t.quality!=="Vermindert").forEach(t=>inversions.forEach(inv=>{
+   const raw=inv.order.map((idx,i)=>{
+    let midi=t.midi[idx];
+    while(i&&midi<=t.midi[inv.order[i-1]])midi+=12;
+    const n=noteFromMidi(midi,t.notes[idx]);
+    return {...n,diatonicOffset:offsetForClef(n,"treble")}
+   });
+   out.push({type:"triad",prompt:`In welcher Lage steht der ${t.root}-${t.quality}-Dreiklang?`,correct:inv.name,
+    options:["Grundstellung","1. Umkehrung","2. Umkehrung"],clef:"treble",notes:raw,
+    weakKey:`triad:inv:${t.root}:${inv.name}`})
+  }))
  }
  return out
 }
+
+const KEY_SIGNATURES=[
+ {major:"C-Dur",minor:"a-Moll",count:0,kind:"keine",names:"keine"},
+ {major:"G-Dur",minor:"e-Moll",count:1,kind:"Kreuz",names:"fis"},
+ {major:"D-Dur",minor:"h-Moll",count:2,kind:"Kreuze",names:"fis, cis"},
+ {major:"A-Dur",minor:"fis-Moll",count:3,kind:"Kreuze",names:"fis, cis, gis"},
+ {major:"E-Dur",minor:"cis-Moll",count:4,kind:"Kreuze",names:"fis, cis, gis, dis"},
+ {major:"F-Dur",minor:"d-Moll",count:1,kind:"Be",names:"b"},
+ {major:"B-Dur",minor:"g-Moll",count:2,kind:"Be",names:"b, es"},
+ {major:"Es-Dur",minor:"c-Moll",count:3,kind:"Be",names:"b, es, as"},
+ {major:"As-Dur",minor:"f-Moll",count:4,kind:"Be",names:"b, es, as, des"}
+];
+function theoryQuestion(prompt,correct,options,label,key){
+ return {type:"theory",prompt,correct,options:shuffle([...new Set(options)]),display:label,weakKey:key}
+}
+function keyPool(){
+ const diff=$("difficulty").value;
+ const rows=diff==="easy"?KEY_SIGNATURES.filter(k=>k.count<=2):diff==="medium"?KEY_SIGNATURES.filter(k=>k.count<=3):KEY_SIGNATURES;
+ const majors=rows.map(k=>k.major),minors=rows.map(k=>k.minor),out=[];
+ rows.forEach(k=>{
+  const sig=k.count===0?"keine Vorzeichen":`${k.count} ${k.kind}: ${k.names}`;
+  const otherSigs=[...new Set(rows.map(x=>x.count===0?"keine Vorzeichen":`${x.count} ${x.kind}: ${x.names}`).filter(x=>x!==sig))];
+  out.push(theoryQuestion(`Welche Vorzeichen hat ${k.major}?`,sig,[sig,...shuffle(otherSigs).slice(0,3)],k.major,`key:signature:${k.major}`));
+  out.push(theoryQuestion(`Welche Molltonart ist die Paralleltonart von ${k.major}?`,k.minor,[k.minor,...shuffle(minors.filter(x=>x!==k.minor)).slice(0,3)],`${k.major} ↔ ?`,`key:parallel:${k.major}`));
+  out.push(theoryQuestion(`Welche Durtonart ist die Paralleltonart von ${k.minor}?`,k.major,[k.major,...shuffle(majors.filter(x=>x!==k.major)).slice(0,3)],`${k.minor} ↔ ?`,`key:parallel:${k.minor}`));
+ });
+ if(diff!=="easy"){
+  [["C-Dur","G-Dur"],["G-Dur","D-Dur"],["D-Dur","A-Dur"],["C-Dur","F-Dur"],["F-Dur","B-Dur"],["B-Dur","Es-Dur"]]
+   .forEach(([from,to])=>out.push(theoryQuestion(`Welche Tonart liegt im Quintenzirkel direkt neben ${from}?`,to,[to,...shuffle(majors.filter(x=>x!==to&&x!==from)).slice(0,3)],"Quintenzirkel",`key:circle:${from}:${to}`)));
+ }
+ return out
+}
+const HARMONY_KEYS=[
+ {key:"C-Dur",tones:["c","d","e","f","g","a","h"],triads:["C-Dur","d-Moll","e-Moll","F-Dur","G-Dur","a-Moll","h-vermindert"]},
+ {key:"G-Dur",tones:["g","a","h","c","d","e","fis"],triads:["G-Dur","a-Moll","h-Moll","C-Dur","D-Dur","e-Moll","fis-vermindert"]},
+ {key:"F-Dur",tones:["f","g","a","b","c","d","e"],triads:["F-Dur","g-Moll","a-Moll","B-Dur","C-Dur","d-Moll","e-vermindert"]}
+];
+function harmonyPool(){
+ const diff=$("difficulty").value,out=[];
+ const functionNames={1:"Tonika",4:"Subdominante",5:"Dominante"};
+ HARMONY_KEYS.forEach(k=>{
+  [1,4,5].forEach(degree=>{
+   const i=degree-1,correct=k.triads[i];
+   out.push(theoryQuestion(`Welcher Dreiklang steht in ${k.key} auf der ${degree}. Stufe?`,correct,[correct,...shuffle(k.triads.filter((_,j)=>j!==i)).slice(0,3)],`${k.key} · ${degree}. Stufe`,`harmony:degree:${k.key}:${degree}`));
+   out.push(theoryQuestion(`Welche harmonische Funktion hat die ${degree}. Stufe in Dur?`,functionNames[degree],[functionNames[degree],...["Tonika","Subdominante","Dominante","Mollparallele"].filter(x=>x!==functionNames[degree])],`${degree}. Stufe`,`harmony:function:${degree}`));
+  });
+  const tonic=`${k.tones[0]} – ${k.tones[2]} – ${k.tones[4]}`;
+  out.push(theoryQuestion(`Welche drei Töne bilden den Tonika-Dreiklang in ${k.key}?`,tonic,[tonic,`${k.tones[0]} – ${k.tones[1]} – ${k.tones[4]}`,`${k.tones[0]} – ${k.tones[3]} – ${k.tones[4]}`,`${k.tones[1]} – ${k.tones[3]} – ${k.tones[5]}`],`${k.key}: Tonika`,`harmony:build:${k.key}`));
+ });
+ const qualities=[["große Terz + kleine Terz","Dur"],["kleine Terz + große Terz","Moll"],["kleine Terz + kleine Terz","vermindert"],["große Terz + große Terz","übermäßig"]];
+ const allowed=diff==="easy"?qualities.slice(0,2):diff==="medium"?qualities.slice(0,3):qualities;
+ allowed.forEach(([structure,quality])=>out.push(theoryQuestion(`Welcher Dreiklang besteht aus ${structure}?`,quality,[quality,...allowed.map(x=>x[1]).filter(x=>x!==quality)],structure,`harmony:quality:${quality}`)));
+ if(diff==="hard"){
+  [["Quintton im Bass","2. Umkehrung"],["Terzton im Bass","1. Umkehrung"],["Grundton im Bass","Grundstellung"]]
+   .forEach(([bass,position])=>out.push(theoryQuestion(`Welche Lage liegt vor, wenn der ${bass} liegt?`,position,[position,...["Grundstellung","1. Umkehrung","2. Umkehrung"].filter(x=>x!==position)],bass,`harmony:inversion:${position}`)));
+ }
+ return out
+}
+
 function adaptivePick(pool,count){
  const weak=getWeak(),weighted=[];pool.forEach(q=>{const w=Math.min(4,1+(weak[q.weakKey]||0));for(let i=0;i<w;i++)weighted.push(q)});
  const result=[],used=new Set();while(result.length<count&&weighted.length){const q=weighted[Math.floor(Math.random()*weighted.length)];const key=q.weakKey+"-"+result.length;if(!used.has(q.weakKey)||pool.length<count){result.push(q);used.add(q.weakKey)}weighted.splice(weighted.indexOf(q),1)}
@@ -314,10 +440,10 @@ function playReferenceThenTarget(reference,target){
   gain.gain.exponentialRampToValueAtTime(volume,start+0.03);
   gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
   osc.connect(gain).connect(audioCtx.destination);
-  osc.start(start);osc.stop(start+duration+0.03)
+  osc.start(start);osc.stop(start+duration+0.03);
  }
  tone(reference.midi,now);
- tone(target.midi,now+1.15)
+ tone(target.midi,now+1.15);
 }
 
 function renderQuestion(){
@@ -338,10 +464,10 @@ function renderQuestion(){
 
  if(q.type==="ear-relative-tone"){
   $("playAudio").onclick=()=>playReferenceThenTarget(q.reference,q.target);
-  setTimeout(()=>$("playAudio").click(),250)
+  setTimeout(()=>$("playAudio").click(),250);
  } else if(q.type.startsWith("ear")){
   $("playAudio").onclick=()=>playMidi(q.midi,q.simultaneous);
-  setTimeout(()=>$("playAudio").click(),250)
+  setTimeout(()=>$("playAudio").click(),250);
  }
  $("answers").innerHTML="";q.options.forEach(opt=>{const b=document.createElement("button");b.className="answer";b.textContent=opt;b.onclick=()=>choose(b,opt,q);$("answers").appendChild(b)})
 }

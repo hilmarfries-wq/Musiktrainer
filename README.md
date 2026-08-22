@@ -1,9 +1,12 @@
-# Musiktrainer Web-App 3.2.4
+# Musiktrainer Web-App 3.2.5
 
-## Fehlerkorrektur
+Diese Version wurde neu auf der funktionierenden Version 3.2 aufgebaut.
 
-Version 3.2.4 basiert auf der zuvor lauffähigen Version 3.2.2.
+## Behoben
+- Startfehler durch versehentlich entfernte Modul-Funktionen beseitigt
+- Tonarten, Harmonielehre, Skalen und Dreiklänge bleiben vollständig erhalten
+- Gehörbildung nutzt bei Tonhöhen einen benannten Referenzton
+- Vorzeichen werden als einfache SVG-Geometrie direkt um die Tonhöhe des Notenkopfes gezeichnet
 
-Die Vorzeichen werden jetzt direkt als einfache SVG-Geometrie gezeichnet und exakt um die Y-Position des Notenkopfes konstruiert. Die problematische Glyphen-Berechnung aus Version 3.2.3 wurde vollständig entfernt.
-
-Dadurch soll der Test wieder zuverlässig starten und Kreuz, Be sowie Auflösungszeichen auf der richtigen Tonhöhe erscheinen.
+## Ursache des früheren Startfehlers
+Beim Umbau der Gehörbildung waren in einer späteren Version versehentlich `scalePool` und `triadPool` beziehungsweise weitere Modul-Funktionen aus `app.js` entfernt worden. Der Startknopf referenzierte diese Funktionen weiterhin.

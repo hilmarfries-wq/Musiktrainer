@@ -91,5 +91,4 @@ table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:11px 10p
  font-size:clamp(1.15rem,3vw,1.65rem);font-weight:800;text-align:center;letter-spacing:.01em
 }
 
-.reference-label{margin-bottom:14px;font-size:1.15rem}
-.reference-label strong{font-size:1.35rem}
+.reference-label{margin-bottom:14px;font-size:1.15rem}.reference-label strong{font-size:1.35rem}
