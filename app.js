@@ -40,15 +40,32 @@ const MUSIC_CLEF_PATHS={"treble": "M314 801Q300 854 291.0 906.0Q282 958 282 1012
 const MUSIC_ACCIDENTAL_PATHS={"sharp": "M502 82 404 39V-135H357V20L196 -58V-233H149V-77L51 -124V-46L149 0V245L51 198V276L149 323V482H196V342L357 420V590H404V439L502 485V408L404 361V116L502 160ZM357 97V342L196 264V19Z", "flat": "M51 524H88V179Q117 220 148.0 243.5Q179 267 209 267Q250 267 273.0 242.0Q296 217 296 173Q296 115 263 70Q241 40 208.0 19.0Q175 -2 138.5 -13.5Q102 -25 69 -25H51ZM88 141V3Q115 3 153 25Q192 47 215.5 83.0Q239 119 239 162Q239 191 230.5 206.5Q222 222 199 222Q171 222 140.5 198.0Q110 174 88 141Z", "natural": "M306 -213H259V-59L51 -156V404H98V264L306 361ZM259 19V261L98 186V-57Z"};
 function clefSvg(clef){
  if(clef==="treble"){
-  // The treble-clef spiral is centred on the second staff line from below (G line).
   return `<path d="${MUSIC_CLEF_PATHS.treble}" transform="translate(67 149) scale(.085 -.085)" fill="#182033"/>`;
  }
  if(clef==="bass"){
-  // Bass-clef dots surround the second staff line from above (F line).
   return `<path d="${MUSIC_CLEF_PATHS.bass}" transform="translate(68 151) scale(.083 -.083)" fill="#182033"/>`;
  }
- const y=clef==="tenor"?151:160;
- return `<path d="${MUSIC_CLEF_PATHS.cClef}" transform="translate(68 ${y}) scale(.083 -.083)" fill="#182033"/>`;
+
+ // Staff lines are y=72,90,108,126,144.
+ // A C-clef marks c¹ exactly at its central waist:
+ // alto = 3rd line (y=108), tenor = 4th line from below (y=90).
+ const cy=clef==="tenor"?90:108;
+ const x=103;
+
+ return `<g aria-label="${clef==="tenor"?"Tenorschlüssel":"Altschlüssel"}">
+   <line x1="${x-27}" y1="${cy-39}" x2="${x-27}" y2="${cy+39}" stroke="#182033" stroke-width="5"/>
+   <line x1="${x-18}" y1="${cy-39}" x2="${x-18}" y2="${cy+39}" stroke="#182033" stroke-width="3"/>
+   <path d="M ${x-15} ${cy-38}
+            C ${x+18} ${cy-38}, ${x+31} ${cy-20}, ${x+8} ${cy}
+            C ${x+31} ${cy+20}, ${x+18} ${cy+38}, ${x-15} ${cy+38}"
+         fill="none" stroke="#182033" stroke-width="6" stroke-linecap="round"/>
+   <path d="M ${x+8} ${cy}
+            L ${x+25} ${cy-13}
+            M ${x+8} ${cy}
+            L ${x+25} ${cy+13}"
+         fill="none" stroke="#182033" stroke-width="5" stroke-linecap="round"/>
+   <circle cx="${x+8}" cy="${cy}" r="3.5" fill="#182033"/>
+  </g>`;
 }
 function accidentalSvg(kind,x,y){
  if(!kind)return "";
@@ -113,17 +130,16 @@ function drawStaff(items,clef){
 }
 function diatonicNumber(n){const map={c:0,d:1,e:2,f:3,g:4,a:5,h:6};return n.oct*7+map[n.name]}
 function offsetForClef(n,clef){
+ // In this app oct:3 is labelled c¹, d¹, ...
+ // diatonicOffset 0 = bottom staff line; +2 = next line upward.
  const refs={
-  treble:{name:"e",oct:3,lineIndexFromBottom:0},
-  bass:{name:"g",oct:2,lineIndexFromBottom:0},
-  alto:{name:"c",oct:3,lineIndexFromBottom:2},
-  tenor:{name:"c",oct:3,lineIndexFromBottom:3}
+  treble:{name:"e",oct:3,offset:0}, // e¹ bottom line
+  bass:{name:"g",oct:2,offset:0},   // g bottom line
+  alto:{name:"c",oct:3,offset:4},   // c¹ third line
+  tenor:{name:"c",oct:3,offset:6}   // c¹ fourth line from below
  };
  const ref=refs[clef];
-
- // drawStaff interprets diatonicOffset=0 as the bottom staff line.
- // Therefore the clef reference tone must be shifted to its actual line.
- return diatonicNumber(n)-diatonicNumber(ref)+ref.lineIndexFromBottom*2;
+ return diatonicNumber(n)-diatonicNumber(ref)+ref.offset;
 }
 function noteOptions(correct,pool){const near=pool.filter(n=>n.id!==correct.id).sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi)).slice(0,7);return shuffle([correct.label,...shuffle(near).slice(0,3).map(n=>n.label)])}
 

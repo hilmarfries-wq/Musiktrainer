@@ -1,13 +1,12 @@
-# Musiktrainer Web-App 3.2.6
+# Musiktrainer Web-App 3.2.7
 
-## Korrektur C-Schlüssel
+## Alt- und Tenorschlüssel neu aufgebaut
 
-Alt- und Tenorschlüssel sind C-Schlüssel.
+Die C-Schlüssel werden nicht mehr über die bisherige Musik-Glyphe positioniert, sondern direkt als SVG gezeichnet.
 
-- Altschlüssel: c¹ liegt auf der mittleren (3.) Linie.
-- Tenorschlüssel: c¹ liegt auf der 4. Linie von unten.
+- Altschlüssel: Mittelpunkt des C-Schlüssels liegt exakt auf der 3. Linie; dort liegt c¹.
+- Tenorschlüssel: Mittelpunkt des C-Schlüssels liegt exakt auf der 4. Linie von unten; dort liegt c¹.
 
-Die Tonhöhenberechnung wurde entsprechend korrigiert.
+Auch die Notenberechnung verwendet dieselben beiden Bezugslinien. Damit stimmen grafischer Schlüssel und abgefragte Tonhöhe miteinander überein.
 
-## Neu
-Oben in der App wird jetzt die geladene Versionsnummer angezeigt. So lässt sich nach GitHub-Updates sofort erkennen, ob der Browser noch eine alte Datei aus dem Cache verwendet.
+Die Versionsanzeige bleibt erhalten.
