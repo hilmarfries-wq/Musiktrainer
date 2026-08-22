@@ -92,3 +92,5 @@ table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:11px 10p
 }
 
 .reference-label{margin-bottom:14px;font-size:1.15rem}.reference-label strong{font-size:1.35rem}
+
+#appVersionBadge{white-space:nowrap}

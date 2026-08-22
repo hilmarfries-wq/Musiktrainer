@@ -113,8 +113,17 @@ function drawStaff(items,clef){
 }
 function diatonicNumber(n){const map={c:0,d:1,e:2,f:3,g:4,a:5,h:6};return n.oct*7+map[n.name]}
 function offsetForClef(n,clef){
- const refs={treble:{name:"e",oct:3},bass:{name:"g",oct:2},alto:{name:"f",oct:3},tenor:{name:"d",oct:3}};
- return diatonicNumber(n)-diatonicNumber(refs[clef])
+ const refs={
+  treble:{name:"e",oct:3,lineIndexFromBottom:0},
+  bass:{name:"g",oct:2,lineIndexFromBottom:0},
+  alto:{name:"c",oct:3,lineIndexFromBottom:2},
+  tenor:{name:"c",oct:3,lineIndexFromBottom:3}
+ };
+ const ref=refs[clef];
+
+ // drawStaff interprets diatonicOffset=0 as the bottom staff line.
+ // Therefore the clef reference tone must be shifted to its actual line.
+ return diatonicNumber(n)-diatonicNumber(ref)+ref.lineIndexFromBottom*2;
 }
 function noteOptions(correct,pool){const near=pool.filter(n=>n.id!==correct.id).sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi)).slice(0,7);return shuffle([correct.label,...shuffle(near).slice(0,3).map(n=>n.label)])}
 
@@ -690,3 +699,10 @@ refreshProfiles();
  const hash=location.hash.startsWith("#test=")?location.hash.slice(6):"";
  if(hash)applyLockedTest(b64Decode(hash))
 })();
+
+function applyVersionBadge(){
+ const version=(window.MUSIKTRAINER_CONFIG&&window.MUSIKTRAINER_CONFIG.appVersion)||"";
+ const el=document.getElementById("appVersionBadge");
+ if(el)el.textContent=version?`Version ${version}`:"";
+}
+applyVersionBadge();

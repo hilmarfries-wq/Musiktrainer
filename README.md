@@ -1,12 +1,13 @@
-# Musiktrainer Web-App 3.2.5
+# Musiktrainer Web-App 3.2.6
 
-Diese Version wurde neu auf der funktionierenden Version 3.2 aufgebaut.
+## Korrektur C-Schlüssel
 
-## Behoben
-- Startfehler durch versehentlich entfernte Modul-Funktionen beseitigt
-- Tonarten, Harmonielehre, Skalen und Dreiklänge bleiben vollständig erhalten
-- Gehörbildung nutzt bei Tonhöhen einen benannten Referenzton
-- Vorzeichen werden als einfache SVG-Geometrie direkt um die Tonhöhe des Notenkopfes gezeichnet
+Alt- und Tenorschlüssel sind C-Schlüssel.
 
-## Ursache des früheren Startfehlers
-Beim Umbau der Gehörbildung waren in einer späteren Version versehentlich `scalePool` und `triadPool` beziehungsweise weitere Modul-Funktionen aus `app.js` entfernt worden. Der Startknopf referenzierte diese Funktionen weiterhin.
+- Altschlüssel: c¹ liegt auf der mittleren (3.) Linie.
+- Tenorschlüssel: c¹ liegt auf der 4. Linie von unten.
+
+Die Tonhöhenberechnung wurde entsprechend korrigiert.
+
+## Neu
+Oben in der App wird jetzt die geladene Versionsnummer angezeigt. So lässt sich nach GitHub-Updates sofort erkennen, ob der Browser noch eine alte Datei aus dem Cache verwendet.
