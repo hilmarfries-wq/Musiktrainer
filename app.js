@@ -1,3 +1,4 @@
+let testTimerInterval=null,testDeadline=0,testTimeLimit=0,testFinished=false;
 const NOTES=[{"id": "c2", "name": "c", "oct": 2, "label": "c", "midi": 36}, {"id": "d2", "name": "d", "oct": 2, "label": "d", "midi": 38}, {"id": "e2", "name": "e", "oct": 2, "label": "e", "midi": 40}, {"id": "f2", "name": "f", "oct": 2, "label": "f", "midi": 41}, {"id": "g2", "name": "g", "oct": 2, "label": "g", "midi": 43}, {"id": "a2", "name": "a", "oct": 2, "label": "a", "midi": 45}, {"id": "h2", "name": "h", "oct": 2, "label": "h", "midi": 47}, {"id": "c3", "name": "c", "oct": 3, "label": "c¹", "midi": 48}, {"id": "d3", "name": "d", "oct": 3, "label": "d¹", "midi": 50}, {"id": "e3", "name": "e", "oct": 3, "label": "e¹", "midi": 52}, {"id": "f3", "name": "f", "oct": 3, "label": "f¹", "midi": 53}, {"id": "g3", "name": "g", "oct": 3, "label": "g¹", "midi": 55}, {"id": "a3", "name": "a", "oct": 3, "label": "a¹", "midi": 57}, {"id": "h3", "name": "h", "oct": 3, "label": "h¹", "midi": 59}, {"id": "c4", "name": "c", "oct": 4, "label": "c²", "midi": 60}, {"id": "d4", "name": "d", "oct": 4, "label": "d²", "midi": 62}, {"id": "e4", "name": "e", "oct": 4, "label": "e²", "midi": 64}, {"id": "f4", "name": "f", "oct": 4, "label": "f²", "midi": 65}, {"id": "g4", "name": "g", "oct": 4, "label": "g²", "midi": 67}, {"id": "a4", "name": "a", "oct": 4, "label": "a²", "midi": 69}, {"id": "h4", "name": "h", "oct": 4, "label": "h²", "midi": 71}, {"id": "c5", "name": "c", "oct": 5, "label": "c³", "midi": 72}, {"id": "d5", "name": "d", "oct": 5, "label": "d³", "midi": 74}, {"id": "e5", "name": "e", "oct": 5, "label": "e³", "midi": 76}, {"id": "f5", "name": "f", "oct": 5, "label": "f³", "midi": 77}, {"id": "g5", "name": "g", "oct": 5, "label": "g³", "midi": 79}];
 const APP_CONFIG=window.MUSIKTRAINER_CONFIG||{};
 const STORAGE_KEY="musiktrainer_webapp_results",WEAK_KEY="musiktrainer_webapp_weak";
@@ -471,6 +472,55 @@ function playReferenceThenTarget(reference,target){
  tone(target.midi,now+1.15);
 }
 
+
+function formatCountdown(totalSeconds){
+ const seconds=Math.max(0,Math.ceil(totalSeconds));
+ const minutes=Math.floor(seconds/60);
+ return `${String(minutes).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+}
+function stopTestTimer(){
+ if(testTimerInterval){
+  clearInterval(testTimerInterval);
+  testTimerInterval=null;
+ }
+}
+function updateTestTimer(){
+ const el=$("testTimer");
+ if(!el)return;
+ if(!testDeadline||testTimeLimit<=0){
+  el.classList.add("hidden");
+  return;
+ }
+ const left=(testDeadline-Date.now())/1000;
+ el.classList.remove("hidden");
+ el.textContent=`⏱ ${formatCountdown(left)}`;
+ el.classList.toggle("timer-warning",left<=60);
+ if(left<=0&&!testFinished){
+  stopTestTimer();
+  el.textContent="⏱ 00:00";
+  finish(true);
+ }
+}
+function startTestTimer(seconds){
+ stopTestTimer();
+ testTimeLimit=Number(seconds)||0;
+ testFinished=false;
+ if(testTimeLimit<=0){
+  testDeadline=0;
+  const el=$("testTimer");
+  if(el){el.classList.add("hidden");el.classList.remove("timer-warning")}
+  return;
+ }
+ testDeadline=Date.now()+testTimeLimit*1000;
+ updateTestTimer();
+ testTimerInterval=setInterval(updateTestTimer,250);
+}
+function timeLimitText(seconds){
+ const s=Number(seconds)||0;
+ if(!s)return "ohne Zeitbegrenzung";
+ return s%60===0?`${s/60} Min.`:`${s} Sek.`;
+}
+
 function renderQuestion(){
  locked=false;const q=queue[index];$("progressText").textContent=`Frage ${index+1} von ${queue.length}`;$("scoreText").textContent=`${score} Punkte`;$("progressFill").style.width=`${index/queue.length*100}%`;$("prompt").textContent=q.prompt;$("feedback").textContent="";
  if(q.type==="pitch")$("visual").innerHTML=drawStaff([q.note],q.clef);
@@ -510,16 +560,23 @@ function choose(button,sel,q){
  }
  setTimeout(()=>{index++;index<queue.length?renderQuestion():finish()},immediate?700:350)
 }
-function finish(){
+function finish(timedOut=false){
+ if(testFinished)return;
+ testFinished=true;
+ stopTestTimer();
  $("quiz").style.display="none";$("result").style.display="block";const percent=Math.round(score/queue.length*100),secs=Math.round((Date.now()-startedAt)/1000),g=grade(percent),name=$("studentName").value.trim()||"Ohne Namensangabe",klass=$("studentClass").value.trim()||"–";
  $("resultName").textContent=`${name} · ${klass} · ${moduleName(selectedModule)}`;$("resultPoints").textContent=`${score} / ${queue.length}`;$("resultPercent").textContent=`${percent} %`;$("resultGrade").textContent=g;$("resultTime").textContent=fmt(secs);
  $("review").innerHTML=mistakes.length?`<h3>Zu wiederholen</h3><ul>${mistakes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"<h3>Alle Aufgaben richtig gelöst.</h3>";
+ if(timedOut){
+  const unanswered=Math.max(0,queue.length-index);
+  $("review").innerHTML=`<div class="timeout-note"><strong>Zeit abgelaufen.</strong> ${unanswered} ${unanswered===1?"Aufgabe wurde":"Aufgaben wurden"} nicht mehr beantwortet und bei der Gesamtwertung als nicht gelöst gewertet.</div>`+$("review").innerHTML;
+ }
  const config=lockedConfig?`${lockedConfig.title} · ${lockedConfig.summary}`:(selectedModule==="pitch"?`${CLEFS[$("clefSelect").value]?.name||"Gemischt"}, ${$("accidentalMode").options[$("accidentalMode").selectedIndex].text}`:selectedModule==="ear"?$("earType").options[$("earType").selectedIndex].text:$("difficulty").options[$("difficulty").selectedIndex].text);
  saveResult({timestamp:new Date().toISOString(),name,klass,module:moduleName(selectedModule),config,score,total:queue.length,percent,grade:g,seconds:secs,mistakes})
 }
 $("startBtn").onclick=()=>{if(selectedModule==="ear")ensureAudio();
  const pools={pitch:pitchPool,rhythm:rhythmPool,interval:intervalPool,ear:earPool,scale:scalePool,triad:triadPool,key:keyPool,harmony:harmonyPool};
- let pool=pools[selectedModule]();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";renderQuestion()};
+ let pool=pools[selectedModule]();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";startTestTimer(Number($("timeLimit").value)||0);renderQuestion()};
 
 function renderResults(){
  const d=getResults().slice().reverse(),body=$("resultsBody");if(!d.length){body.innerHTML='<tr><td colspan="10">Noch keine Ergebnisse gespeichert.</td></tr>';$("stats").innerHTML="";return}
@@ -556,12 +613,13 @@ function buildConfig(){
   klass:$("builderClass").value.trim(),module,
   count:Number($("builderCount").value),
   clef:$("builderClef").value,accidentalMode:$("builderAccidental").value,difficulty:$("builderDifficulty").value,
+  timeLimit:Number($("builderTimeLimit").value)||0,
   earType:$("builderEar").value,feedback:$("builderFeedback").value,
   adaptive:$("builderAdaptive").checked,
-  summary:module==="pitch"?`${labelFor("builderClef")}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`:
-          module==="ear"?`${labelFor("builderEar")}, ${$("builderCount").value} Fragen`:
-          module==="scale"||module==="triad"?`${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`:
-          `${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen`
+  summary:module==="pitch"?`${labelFor("builderClef")}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen${Number($("builderTimeLimit").value)?` · ${timeLimitText($("builderTimeLimit").value)}`:""}`:
+          module==="ear"?`${labelFor("builderEar")}, ${$("builderCount").value} Fragen${Number($("builderTimeLimit").value)?` · ${timeLimitText($("builderTimeLimit").value)}`:""}`:
+          module==="scale"||module==="triad"?`${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen${Number($("builderTimeLimit").value)?` · ${timeLimitText($("builderTimeLimit").value)}`:""}`:
+          `${moduleName(module)}, ${labelFor("builderDifficulty")}, ${$("builderCount").value} Fragen${Number($("builderTimeLimit").value)?` · ${timeLimitText($("builderTimeLimit").value)}`:""}`
  }
 }
 function makeTestLink(){
@@ -594,6 +652,7 @@ function applyLockedTest(cfg){
  $("studentClass").value=cfg.klass||"";
  $("studentClass").readOnly=Boolean(cfg.klass);
  $("questionCount").value=String(cfg.count||10);
+ $("timeLimit").value=String(cfg.timeLimit||0);
  $("clefSelect").value=cfg.clef||"treble";
  $("accidentalMode").value=cfg.accidentalMode||"single";
  $("difficulty").value=cfg.difficulty||"medium";

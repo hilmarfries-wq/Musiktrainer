@@ -1,12 +1,22 @@
-# Musiktrainer Web-App 3.2.7
+# Musiktrainer Web-App 3.2.8
 
-## Alt- und Tenorschlüssel neu aufgebaut
+## Neu: Zeitbegrenzung
 
-Die C-Schlüssel werden nicht mehr über die bisherige Musik-Glyphe positioniert, sondern direkt als SVG gezeichnet.
+Tests können jetzt mit einer Gesamtzeit versehen werden.
 
-- Altschlüssel: Mittelpunkt des C-Schlüssels liegt exakt auf der 3. Linie; dort liegt c¹.
-- Tenorschlüssel: Mittelpunkt des C-Schlüssels liegt exakt auf der 4. Linie von unten; dort liegt c¹.
+Verfügbare Einstellungen:
+- keine Zeitbegrenzung
+- 3 Minuten
+- 5 Minuten
+- 10 Minuten
+- 15 Minuten
+- 20 Minuten
+- 30 Minuten
 
-Auch die Notenberechnung verwendet dieselben beiden Bezugslinien. Damit stimmen grafischer Schlüssel und abgefragte Tonhöhe miteinander überein.
+Die Lehrkraft kann die Zeit im Testgenerator festlegen. Sie wird im erzeugten Schülerlink gespeichert.
+
+Während des Tests läuft ein sichtbarer Countdown. In der letzten Minute wird die Anzeige hervorgehoben. Bei 00:00 endet der Test automatisch. Nicht mehr beantwortete Aufgaben zählen bei der Gesamtwertung als nicht gelöst.
+
+Auch frei gestartete Tests können im Schülerbereich mit einer Zeitbegrenzung versehen werden.
 
 Die Versionsanzeige bleibt erhalten.
