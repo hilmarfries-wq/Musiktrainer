@@ -1,11 +1,12 @@
-# Musiktrainer Web-App 3.2.8
+# Musiktrainer Web-App 3.2.10
 
-## Neu: Zeitbegrenzung
+## Neu: 1-Minuten-Zeitbegrenzung
 
-Tests können jetzt mit einer Gesamtzeit versehen werden.
+Bei Tests kann jetzt zusätzlich eine Gesamtzeit von **1 Minute** gewählt werden.
 
-Verfügbare Einstellungen:
+Verfügbare Zeitlimits:
 - keine Zeitbegrenzung
+- 1 Minute
 - 3 Minuten
 - 5 Minuten
 - 10 Minuten
@@ -13,10 +14,6 @@ Verfügbare Einstellungen:
 - 20 Minuten
 - 30 Minuten
 
-Die Lehrkraft kann die Zeit im Testgenerator festlegen. Sie wird im erzeugten Schülerlink gespeichert.
+Die 1-Minuten-Option steht sowohl beim normalen Test als auch im Lehrer-Testgenerator zur Verfügung und wird in generierten Testlinks gespeichert.
 
-Während des Tests läuft ein sichtbarer Countdown. In der letzten Minute wird die Anzeige hervorgehoben. Bei 00:00 endet der Test automatisch. Nicht mehr beantwortete Aufgaben zählen bei der Gesamtwertung als nicht gelöst.
-
-Auch frei gestartete Tests können im Schülerbereich mit einer Zeitbegrenzung versehen werden.
-
-Die Versionsanzeige bleibt erhalten.
+Alle Funktionen aus Version 3.2.9 bleiben erhalten.

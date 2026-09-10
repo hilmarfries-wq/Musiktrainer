@@ -166,7 +166,12 @@ function pitchPool(){
  let naturals=NOTES.filter(n=>diff==="easy"?n.midi>=52&&n.midi<=67:diff==="medium"?n.midi>=48&&n.midi<=72:true);
  const mode=$("accidentalMode").value;
  const pool=accidentalPitchPool(naturals,mode);
- const clefSel=$("clefSelect").value,clefs=clefSel==="mixed"?["treble","bass","alto","tenor"]:[clefSel];
+ const clefSel=$("clefSelect").value;
+ const clefs=clefSel==="mixed"
+  ?["treble","bass","alto","tenor"]
+  :clefSel==="treble-bass"
+   ?["treble","bass"]
+   :[clefSel];
  let out=[];
  clefs.forEach(c=>pool.forEach(n=>out.push({
   type:"pitch",prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,correct:n.label,

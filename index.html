@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Musiktrainer Web-App 3.2.8</title>
+<title>Musiktrainer Web-App 3.2.10</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app"><div class="card">
 <div class="header">
-<div><h1>🎼 Musiktrainer Web-App 3.2.8</h1><p class="sub">Notenlesen mit Vorzeichen, Rhythmus, Skalen, Dreiklänge und Gehörbildung</p></div>
-<div class="badge" id="appVersionBadge">Version 3.2.8</div><div class="badge">GitHub-Pages-fähig</div>
+<div><h1>🎼 Musiktrainer Web-App 3.2.10</h1><p class="sub">Notenlesen mit Vorzeichen, Rhythmus, Skalen, Dreiklänge und Gehörbildung</p></div>
+<div class="badge" id="appVersionBadge">Version 3.2.10</div><div class="badge">GitHub-Pages-fähig</div>
 </div>
 
 <div class="tabs">
@@ -47,6 +47,7 @@
 <div class="field"><label>Fragenzahl</label><select id="questionCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
 <div class="field"><label>Zeitbegrenzung</label><select id="timeLimit">
 <option value="0" selected>Keine Zeitbegrenzung</option>
+<option value="60">1 Minute</option>
 <option value="180">3 Minuten</option>
 <option value="300">5 Minuten</option>
 <option value="600">10 Minuten</option>
@@ -54,10 +55,10 @@
 <option value="1200">20 Minuten</option>
 <option value="1800">30 Minuten</option>
 </select></div>
-<div class="field" id="accidentalField"><label>Vorzeichen</label><select id="accidentalMode"><option value="none">Ohne Vorzeichen</option><option value="single" selected>Einzelne Vorzeichen</option><option value="mixed">Gemischt mit Auflösungszeichen</option></select></div>
-<div class="field" id="clefField"><label>Notenschlüssel</label><select id="clefSelect"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="mixed">Gemischt</option></select></div>
+<div class="field" id="accidentalField"><label>Vorzeichen</label><select id="accidentalMode"><option value="none">Ohne Vorzeichen</option><option value="single" selected>Einzelne Vorzeichen</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt mit Auflösungszeichen</option></select></div>
+<div class="field" id="clefField"><label>Notenschlüssel</label><select id="clefSelect"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt</option></select></div>
 <div class="field" id="difficultyField"><label>Schwierigkeit</label><select id="difficulty"><option value="easy">Grundlage</option><option value="medium" selected>Mittel</option><option value="hard">Erweitert</option></select></div>
-<div class="field" id="earTypeField" style="display:none"><label>Höraufgaben</label><select id="earType"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="mixed">Gemischt</option></select></div>
+<div class="field" id="earTypeField" style="display:none"><label>Höraufgaben</label><select id="earType"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt</option></select></div>
 </div>
 </div><div class="actions"><button id="startBtn" class="primary">Test starten</button></div>
 <div class="notice">Die App läuft vollständig im Browser. Ergebnisse werden auf diesem Gerät gespeichert. Audio beginnt erst nach dem Startknopf, damit es auf iPads zuverlässig funktioniert.</div>
@@ -122,6 +123,7 @@
 <div class="field"><label>Fragenzahl</label><select id="builderCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
 <div class="field"><label>Zeitbegrenzung</label><select id="builderTimeLimit">
 <option value="0" selected>Keine Zeitbegrenzung</option>
+<option value="60">1 Minute</option>
 <option value="180">3 Minuten</option>
 <option value="300">5 Minuten</option>
 <option value="600">10 Minuten</option>
@@ -129,10 +131,10 @@
 <option value="1200">20 Minuten</option>
 <option value="1800">30 Minuten</option>
 </select></div>
-<div class="field" id="builderAccidentalField"><label>Vorzeichen beim Notenlesen</label><select id="builderAccidental"><option value="none">Ohne Vorzeichen</option><option value="single" selected>Einzelne Vorzeichen</option><option value="mixed">Gemischt mit Auflösungszeichen</option></select></div>
-<div class="field" id="builderClefField"><label>Notenschlüssel</label><select id="builderClef"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="mixed">Gemischt</option></select></div>
+<div class="field" id="builderAccidentalField"><label>Vorzeichen beim Notenlesen</label><select id="builderAccidental"><option value="none">Ohne Vorzeichen</option><option value="single" selected>Einzelne Vorzeichen</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt mit Auflösungszeichen</option></select></div>
+<div class="field" id="builderClefField"><label>Notenschlüssel</label><select id="builderClef"><option value="treble">Violinschlüssel</option><option value="bass">Bassschlüssel</option><option value="alto">Altschlüssel</option><option value="tenor">Tenorschlüssel</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt</option></select></div>
 <div class="field"><label>Schwierigkeit</label><select id="builderDifficulty"><option value="easy">Grundlage</option><option value="medium" selected>Mittel</option><option value="hard">Erweitert</option></select></div>
-<div class="field hidden" id="builderEarField"><label>Höraufgaben</label><select id="builderEar"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="mixed">Gemischt</option></select></div>
+<div class="field hidden" id="builderEarField"><label>Höraufgaben</label><select id="builderEar"><option value="tone">Tonhöhe</option><option value="interval">Intervall</option><option value="chord">Dur oder Moll</option><option value="treble-bass">Violin- und Bassschlüssel</option><option value="mixed">Gemischt</option></select></div>
 <div class="field"><label>Rückmeldung während des Tests</label><select id="builderFeedback"><option value="on">Sofort anzeigen</option><option value="off">Erst am Ende auswerten</option></select></div>
 </div>
 <label class="checkrow"><input id="builderAdaptive" type="checkbox"> Adaptive Gewichtung früherer Fehler verwenden</label>
@@ -164,11 +166,11 @@
 </section>
 
 <section id="aboutPanel" class="panel">
-<h2>Version 3.2.8</h2>
+<h2>Version 3.2.10</h2>
 <p>Version 3.1 ergänzt Vorzeichen beim Notenlesen sowie neue Tests zu Skalen und Dreiklängen.</p>
 <p class="sub">Klassen, Profile, Testvorlagen und Ergebnisse werden momentan auf dem jeweiligen Gerät gespeichert. Für geräteübergreifende Konten und eine zentrale Ergebnisübertragung wird später eine Cloud-Datenbank verbunden.</p>
 </section>
-<div class="footer">Musiktrainer Web-App 3.2.8 · Neue benotete Testmodule · GitHub Pages</div>
+<div class="footer">Musiktrainer Web-App 3.2.10 · Neue benotete Testmodule · GitHub Pages</div>
 </div></div>
 
 <script src="config.js"></script>
