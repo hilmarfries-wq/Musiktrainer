@@ -1,12 +1,11 @@
-# Musiktrainer Web-App 3.2.12
+# Musiktrainer Web-App 3.2.13
 
-## Notenlesen: vier unterschiedliche Antworten
+Diese Version basiert wieder auf der funktionierenden Version 3.2.11.
 
-Beim Bestimmen von Notennamen gibt es jetzt immer vier verschiedene Antwortmöglichkeiten.
+Korrektur beim Notenlesen:
+- vier verschiedene Antwortmöglichkeiten
+- richtige Antwort genau einmal
+- drei verschiedene falsche Antworten
+- maximal zwei Hilfslinien
 
-- die richtige Antwort erscheint genau einmal
-- die drei falschen Antworten sind verschieden
-- doppelte sichtbare Notennamen werden entfernt
-- maximal zwei Hilfslinien bleiben erhalten
-
-Alle Funktionen aus Version 3.2.11 bleiben erhalten.
+Die Änderung an den Antwortmöglichkeiten wurde bewusst klein gehalten, damit die bestehende Test-Startlogik unverändert bleibt.

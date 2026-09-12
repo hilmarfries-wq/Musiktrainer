@@ -143,31 +143,34 @@ function offsetForClef(n,clef){
  return diatonicNumber(n)-diatonicNumber(ref)+ref.offset;
 }
 function noteOptions(correct,pool){
- const correctLabel=correct.label;
+ const wrong=[];
+ const near=pool
+  .filter(n=>n.id!==correct.id&&n.label!==correct.label)
+  .sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi));
 
- const uniqueWrongLabels=[...new Set(
-  pool
-   .map(n=>n.label)
-   .filter(label=>label&&label!==correctLabel)
- )];
-
- const fallbackLabels=[
-  "c","cis","des","d","dis","es","e","f","fis","ges",
-  "g","gis","as","a","ais","b","h",
-  "c¹","cis¹","des¹","d¹","dis¹","es¹","e¹","f¹","fis¹","ges¹",
-  "g¹","gis¹","as¹","a¹","ais¹","b¹","h¹",
-  "c²","cis²","des²","d²","dis²","es²","e²","f²","fis²","ges²",
-  "g²","gis²","as²","a²","ais²","b²","h²"
- ];
-
- fallbackLabels.forEach(label=>{
-  if(label!==correctLabel&&!uniqueWrongLabels.includes(label)){
-   uniqueWrongLabels.push(label);
+ for(const n of near){
+  if(!wrong.includes(n.label)){
+   wrong.push(n.label);
   }
- });
+  if(wrong.length===3)break;
+ }
 
- const wrong=shuffle(uniqueWrongLabels).slice(0,3);
- return shuffle([correctLabel,...wrong]);
+ // Safety fallback in case the filtered pool contains fewer than 3 distinct labels.
+ const fallback=["c","d","e","f","g","a","h","c¹","d¹","e¹","f¹","g¹","a¹","h¹","c²","d²","e²","f²","g²","a²","h²"];
+ for(const label of fallback){
+  if(label!==correct.label&&!wrong.includes(label)){
+   wrong.push(label);
+  }
+  if(wrong.length===3)break;
+ }
+
+ return shuffle([correct.label,wrong[0],wrong[1],wrong[2]]);
+}
+
+const ACCIDENTAL_NAMES={
+ sharp:{c:"cis",d:"dis",e:"eis",f:"fis",g:"gis",a:"ais",h:"his"},
+ flat:{c:"ces",d:"des",e:"es",f:"fes",g:"ges",a:"as",h:"b"},
+ natural:{c:"c",d:"d",e:"e",f:"f",g:"g",a:"a",h:"h"}
 };
 function accidentalPitchPool(basePool,mode){
  const allowed=mode==="none"?[null]:mode==="single"?[null,"sharp","flat"]:[null,"sharp","flat","natural"];
