@@ -1,7 +1,7 @@
 window.MUSIKTRAINER_CONFIG = {
   appName: "Musiktrainer",
   appVersion: "3.2.12",
-  teacherPin: "2000",
+  teacherPin: "071124",
   storageMode: "local",
 
   firebase: {
