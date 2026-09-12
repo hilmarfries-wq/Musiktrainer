@@ -1,19 +1,12 @@
-# Musiktrainer Web-App 3.2.10
+# Musiktrainer Web-App 3.2.12
 
-## Neu: 1-Minuten-Zeitbegrenzung
+## Notenlesen: vier unterschiedliche Antworten
 
-Bei Tests kann jetzt zusätzlich eine Gesamtzeit von **1 Minute** gewählt werden.
+Beim Bestimmen von Notennamen gibt es jetzt immer vier verschiedene Antwortmöglichkeiten.
 
-Verfügbare Zeitlimits:
-- keine Zeitbegrenzung
-- 1 Minute
-- 3 Minuten
-- 5 Minuten
-- 10 Minuten
-- 15 Minuten
-- 20 Minuten
-- 30 Minuten
+- die richtige Antwort erscheint genau einmal
+- die drei falschen Antworten sind verschieden
+- doppelte sichtbare Notennamen werden entfernt
+- maximal zwei Hilfslinien bleiben erhalten
 
-Die 1-Minuten-Option steht sowohl beim normalen Test als auch im Lehrer-Testgenerator zur Verfügung und wird in generierten Testlinks gespeichert.
-
-Alle Funktionen aus Version 3.2.9 bleiben erhalten.
+Alle Funktionen aus Version 3.2.11 bleiben erhalten.

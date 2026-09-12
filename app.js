@@ -142,12 +142,32 @@ function offsetForClef(n,clef){
  const ref=refs[clef];
  return diatonicNumber(n)-diatonicNumber(ref)+ref.offset;
 }
-function noteOptions(correct,pool){const near=pool.filter(n=>n.id!==correct.id).sort((a,b)=>Math.abs(a.midi-correct.midi)-Math.abs(b.midi-correct.midi)).slice(0,7);return shuffle([correct.label,...shuffle(near).slice(0,3).map(n=>n.label)])}
+function noteOptions(correct,pool){
+ const correctLabel=correct.label;
 
-const ACCIDENTAL_NAMES={
- sharp:{c:"cis",d:"dis",e:"eis",f:"fis",g:"gis",a:"ais",h:"his"},
- flat:{c:"ces",d:"des",e:"es",f:"fes",g:"ges",a:"as",h:"b"},
- natural:{c:"c",d:"d",e:"e",f:"f",g:"g",a:"a",h:"h"}
+ const uniqueWrongLabels=[...new Set(
+  pool
+   .map(n=>n.label)
+   .filter(label=>label&&label!==correctLabel)
+ )];
+
+ const fallbackLabels=[
+  "c","cis","des","d","dis","es","e","f","fis","ges",
+  "g","gis","as","a","ais","b","h",
+  "c¹","cis¹","des¹","d¹","dis¹","es¹","e¹","f¹","fis¹","ges¹",
+  "g¹","gis¹","as¹","a¹","ais¹","b¹","h¹",
+  "c²","cis²","des²","d²","dis²","es²","e²","f²","fis²","ges²",
+  "g²","gis²","as²","a²","ais²","b²","h²"
+ ];
+
+ fallbackLabels.forEach(label=>{
+  if(label!==correctLabel&&!uniqueWrongLabels.includes(label)){
+   uniqueWrongLabels.push(label);
+  }
+ });
+
+ const wrong=shuffle(uniqueWrongLabels).slice(0,3);
+ return shuffle([correctLabel,...wrong]);
 };
 function accidentalPitchPool(basePool,mode){
  const allowed=mode==="none"?[null]:mode==="single"?[null,"sharp","flat"]:[null,"sharp","flat","natural"];
@@ -172,13 +192,27 @@ function pitchPool(){
   :clefSel==="treble-bass"
    ?["treble","bass"]
    :[clefSel];
+
+ // 0 = unterste Linie, 8 = oberste Linie.
+ // Der Bereich -5 bis 13 benötigt höchstens zwei Hilfslinien.
+ const withinTwoLedgerLines=(n,clef)=>{
+  const offset=offsetForClef(n,clef);
+  return offset>=-5&&offset<=13;
+ };
+
  let out=[];
- clefs.forEach(c=>pool.forEach(n=>out.push({
-  type:"pitch",prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,correct:n.label,
-  options:noteOptions(n,pool),clef:c,
-  note:{...n,diatonicOffset:offsetForClef(n,c)},
-  weakKey:`pitch:${c}:${n.id}`
- })));
+ clefs.forEach(c=>{
+  const visiblePool=pool.filter(n=>withinTwoLedgerLines(n,c));
+  visiblePool.forEach(n=>out.push({
+   type:"pitch",
+   prompt:`Wie heißt diese Note im ${CLEFS[c].name}?`,
+   correct:n.label,
+   options:noteOptions(n,visiblePool),
+   clef:c,
+   note:{...n,diatonicOffset:offsetForClef(n,c)},
+   weakKey:`pitch:${c}:${n.id}`
+  }));
+ });
  return out
 }
 function rhythmPool(){
