@@ -119,3 +119,51 @@ table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:11px 10p
  border-radius:14px;
  background:#fff7f6;
 }
+
+.cloud-manager{
+ margin:14px 0 18px;
+ padding:16px;
+ border:1px solid #dfe5ef;
+ border-radius:16px;
+ background:#f8fafc;
+}
+.cloud-title{
+ display:flex;
+ gap:10px;
+ align-items:center;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ margin-bottom:8px;
+}
+.cloud-pill{
+ display:inline-flex;
+ align-items:center;
+ padding:5px 10px;
+ border-radius:999px;
+ background:#fff0ee;
+ color:#9d2a20;
+ font-size:.86rem;
+ font-weight:700;
+}
+.cloud-pill.cloud-ready{
+ background:#ecfdf3;
+ color:#166534;
+}
+.cloud-login-grid{
+ margin-top:12px;
+}
+.sync-status{
+ margin:10px 0;
+ padding:10px 12px;
+ border-radius:12px;
+ background:#f2f4f7;
+ font-size:.94rem;
+}
+.sync-status.sync-ok{
+ background:#ecfdf3;
+ color:#166534;
+}
+.sync-status.sync-warn{
+ background:#fff7ed;
+ color:#9a3412;
+}

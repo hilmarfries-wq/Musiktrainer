@@ -3,6 +3,10 @@ const NOTES=[{"id": "c2", "name": "c", "oct": 2, "label": "c", "midi": 36}, {"id
 const APP_CONFIG=window.MUSIKTRAINER_CONFIG||{};
 const STORAGE_KEY="musiktrainer_webapp_results",WEAK_KEY="musiktrainer_webapp_weak";
 const TEACHER_PIN=APP_CONFIG.teacherPin||"2000";
+const SUPABASE_CONFIG=APP_CONFIG.supabase||{};
+let cloudTeacherToken=null;
+let cloudResults=null;
+
 const CLASS_KEY="musiktrainer_v30_classes",TEMPLATE_KEY="musiktrainer_v30_templates";
 let selectedModule="pitch",queue=[],index=0,score=0,startedAt=0,mistakes=[],locked=false,currentAudio=null,audioCtx=null,lockedConfig=null,deferredAnswers=[];
 const $=id=>document.getElementById(id),shuffle=a=>[...a].sort(()=>Math.random()-.5);
@@ -20,7 +24,130 @@ function grade(p){return p>=90?"1":p>=80?"2":p>=65?"3":p>=50?"4":p>=30?"5":"6"}
 function fmt(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 function getResults(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch{return[]}}
-function saveResult(r){const d=getResults();d.push(r);localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function setResults(items){localStorage.setItem(STORAGE_KEY,JSON.stringify(items))}
+function cloudEnabled(){
+ const url=(SUPABASE_CONFIG.url||"").trim();
+ const key=(SUPABASE_CONFIG.publishableKey||SUPABASE_CONFIG.anonKey||"").trim();
+ return SUPABASE_CONFIG.enabled===true&&/^https:\/\/.+\.supabase\.co\/?$/.test(url)&&key&&!key.startsWith("DEIN_");
+}
+function cloudBaseUrl(){return (SUPABASE_CONFIG.url||"").replace(/\/+$/,"")}
+function cloudKey(){return SUPABASE_CONFIG.publishableKey||SUPABASE_CONFIG.anonKey||""}
+function newResultId(){
+ if(window.crypto&&typeof crypto.randomUUID==="function")return crypto.randomUUID();
+ return `mt-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+function normalizeLocalResult(r){
+ return {...r,id:r.id||newResultId(),cloudSynced:r.cloudSynced===true}
+}
+function updateStoredResult(updated){
+ const d=getResults();
+ const i=d.findIndex(r=>r.id===updated.id);
+ if(i>=0)d[i]=updated;else d.push(updated);
+ setResults(d)
+}
+function toCloudRow(r){
+ return {
+  id:r.id,
+  client_timestamp:r.timestamp,
+  student_name:r.name,
+  class_name:r.klass,
+  module:r.module,
+  config:r.config||"",
+  score:Number(r.score)||0,
+  total:Number(r.total)||0,
+  percent:Number(r.percent)||0,
+  grade:String(r.grade||""),
+  seconds:Number(r.seconds)||0,
+  mistakes:Array.isArray(r.mistakes)?r.mistakes:[]
+ }
+}
+function fromCloudRow(r){
+ return {
+  id:r.id,
+  timestamp:r.client_timestamp||r.created_at,
+  name:r.student_name,
+  klass:r.class_name,
+  module:r.module,
+  config:r.config||"",
+  score:r.score,
+  total:r.total,
+  percent:r.percent,
+  grade:r.grade,
+  seconds:r.seconds,
+  mistakes:Array.isArray(r.mistakes)?r.mistakes:[],
+  cloudSynced:true
+ }
+}
+function setStudentSyncStatus(text,kind=""){
+ const el=$("resultSyncStatus");
+ if(!el)return;
+ el.textContent=text;
+ el.classList.remove("hidden","sync-ok","sync-warn");
+ if(kind==="ok")el.classList.add("sync-ok");
+ if(kind==="warn")el.classList.add("sync-warn");
+}
+async function cloudInsertResult(r){
+ if(!cloudEnabled())throw new Error("Supabase nicht konfiguriert");
+ const res=await fetch(`${cloudBaseUrl()}/rest/v1/music_results`,{
+  method:"POST",
+  headers:{
+   "apikey":cloudKey(),
+   "Content-Type":"application/json",
+   "Prefer":"return=minimal"
+  },
+  body:JSON.stringify(toCloudRow(r))
+ });
+ if(!res.ok){
+  // A duplicate id means this local result was already uploaded earlier.
+  if(res.status===409)return true;
+  const msg=await res.text().catch(()=>"");
+  throw new Error(`Supabase ${res.status}${msg?`: ${msg}`:""}`)
+ }
+ return true
+}
+async function syncOneLocalResult(r,showStudentStatus=false){
+ const item=normalizeLocalResult(r);
+ updateStoredResult(item);
+ try{
+  await cloudInsertResult(item);
+  item.cloudSynced=true;
+  updateStoredResult(item);
+  if(showStudentStatus)setStudentSyncStatus("Ergebnis lokal und zentral gespeichert.","ok");
+  return {ok:true,item}
+ }catch(err){
+  item.cloudSynced=false;
+  updateStoredResult(item);
+  if(showStudentStatus)setStudentSyncStatus("Ergebnis lokal gespeichert. Cloud-Synchronisierung steht noch aus.","warn");
+  return {ok:false,item,error:err}
+ }
+}
+function saveResult(r){
+ const item=normalizeLocalResult(r);
+ const d=getResults();
+ d.push(item);
+ setResults(d);
+ if(cloudEnabled()){
+  setStudentSyncStatus("Ergebnis lokal gespeichert. Übertragung zu Supabase …");
+  syncOneLocalResult(item,true)
+ }else{
+  setStudentSyncStatus("Ergebnis lokal auf diesem Gerät gespeichert.");
+ }
+}
+async function syncPendingResults(){
+ if(!cloudEnabled())return {ok:0,failed:0};
+ const items=getResults().map(normalizeLocalResult);
+ setResults(items);
+ let ok=0,failed=0;
+ for(const item of items){
+  if(item.cloudSynced)continue;
+  const result=await syncOneLocalResult(item,false);
+  result.ok?ok++:failed++
+ }
+ return {ok,failed}
+}
+function activeResults(){
+ return Array.isArray(cloudResults)?cloudResults:getResults()
+}
 function getWeak(){try{return JSON.parse(localStorage.getItem(WEAK_KEY))||{}}catch{return{}}}
 function bumpWeak(key){const w=getWeak();w[key]=(w[key]||0)+1;localStorage.setItem(WEAK_KEY,JSON.stringify(w))}
 function moduleName(m){
@@ -621,18 +748,113 @@ $("startBtn").onclick=()=>{if(selectedModule==="ear")ensureAudio();
  let pool=pools[selectedModule]();const count=Math.min(Number($("questionCount").value),pool.length);queue=(lockedConfig&&lockedConfig.adaptive===false)?shuffle(pool).slice(0,count):adaptivePick(pool,count);index=0;score=0;mistakes=[];deferredAnswers=[];startedAt=Date.now();$("setup").style.display="none";$("quiz").style.display="block";startTestTimer(Number($("timeLimit").value)||0);renderQuestion()};
 
 function renderResults(){
- const d=getResults().slice().reverse(),body=$("resultsBody");if(!d.length){body.innerHTML='<tr><td colspan="10">Noch keine Ergebnisse gespeichert.</td></tr>';$("stats").innerHTML="";return}
+ const d=activeResults().slice().sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)),body=$("resultsBody");if(!d.length){body.innerHTML='<tr><td colspan="10">Noch keine Ergebnisse gespeichert.</td></tr>';$("stats").innerHTML="";return}
  const avg=Math.round(d.reduce((s,r)=>s+r.percent,0)/d.length),best=Math.max(...d.map(r=>r.percent)),students=new Set(d.map(r=>r.name)).size,mods=new Set(d.map(r=>r.module)).size;
  $("stats").innerHTML=`<div class="stat">Tests<strong>${d.length}</strong></div><div class="stat">Durchschnitt<strong>${avg} %</strong></div><div class="stat">Schüler<strong>${students}</strong></div><div class="stat">Module<strong>${mods}</strong></div>`;
  body.innerHTML=d.map(r=>`<tr><td>${new Intl.DateTimeFormat("de-DE",{dateStyle:"short",timeStyle:"short"}).format(new Date(r.timestamp))}</td><td>${esc(r.name)}</td><td>${esc(r.klass)}</td><td>${r.module}</td><td>${esc(r.config||"–")}</td><td>${r.score}/${r.total}</td><td>${r.percent} %</td><td>${r.grade}</td><td>${fmt(r.seconds)}</td><td>${r.mistakes.length?esc(r.mistakes.join(", ")):"–"}</td></tr>`).join("")
 }
-$("loginBtn").onclick=()=>{if($("teacherPin").value===TEACHER_PIN){$("teacherLogin").style.display="none";$("teacherDashboard").style.display="block";renderResults();renderClasses();renderTemplates()}else alert("PIN ist nicht korrekt.")};
-$("clearBtn").onclick=()=>{if(confirm("Alle lokal gespeicherten Ergebnisse löschen?")){localStorage.removeItem(STORAGE_KEY);renderResults()}};
+$("loginBtn").onclick=()=>{if($("teacherPin").value===TEACHER_PIN){$("teacherLogin").style.display="none";$("teacherDashboard").style.display="block";renderResults();renderClasses();renderTemplates();initCloudManager()}else alert("PIN ist nicht korrekt.")};
+$("clearBtn").onclick=()=>{if(confirm("Alle lokal auf diesem Gerät gespeicherten Ergebnisse löschen? Cloud-Ergebnisse bleiben erhalten.")){localStorage.removeItem(STORAGE_KEY);cloudResults=null;renderResults()}};
 function download(content,name,type){const b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
-$("exportBtn").onclick=()=>{const d=getResults();if(!d.length)return alert("Keine Ergebnisse vorhanden.");const rows=[["Datum","Name","Klasse","Modul","Konfiguration","Punkte","Gesamt","Prozent","Note","Zeit Sekunden","Fehler"],...d.map(r=>[r.timestamp,r.name,r.klass,r.module,r.config,r.score,r.total,r.percent,r.grade,r.seconds,r.mistakes.join(" | ")])];download("\ufeff"+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n"),"Musiktrainer_3_2_Ergebnisse.csv","text/csv")};
+$("exportBtn").onclick=()=>{const d=activeResults();if(!d.length)return alert("Keine Ergebnisse vorhanden.");const rows=[["Datum","Name","Klasse","Modul","Konfiguration","Punkte","Gesamt","Prozent","Note","Zeit Sekunden","Fehler"],...d.map(r=>[r.timestamp,r.name,r.klass,r.module,r.config,r.score,r.total,r.percent,r.grade,r.seconds,r.mistakes.join(" | ")])];download("\ufeff"+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n"),"Musiktrainer_3_2_Ergebnisse.csv","text/csv")};
 $("backupBtn").onclick=()=>download(JSON.stringify({results:getResults(),weak:getWeak()},null,2),"Musiktrainer_2_Sicherung.json","application/json");
 $("importBtn").onclick=()=>$("importFile").click();
 $("importFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);localStorage.setItem(STORAGE_KEY,JSON.stringify(d.results||[]));localStorage.setItem(WEAK_KEY,JSON.stringify(d.weak||{}));renderResults();alert("Sicherung importiert.")}catch{alert("Ungültige Sicherungsdatei.")}};r.readAsText(f)};
+
+
+function setCloudTeacherStatus(text,kind=""){
+ const el=$("cloudStatusText");
+ if(!el)return;
+ el.textContent=text;
+ el.classList.remove("sync-ok","sync-warn");
+ if(kind==="ok")el.classList.add("sync-ok");
+ if(kind==="warn")el.classList.add("sync-warn");
+}
+function initCloudManager(){
+ const configured=cloudEnabled();
+ const pill=$("cloudConfigStatus");
+ if(pill){
+  pill.textContent=configured?"eingerichtet":"nicht eingerichtet";
+  pill.classList.toggle("cloud-ready",configured);
+ }
+ $("cloudLoginFields").classList.toggle("hidden",!configured);
+ $("cloudLoginBtn").classList.toggle("hidden",!configured);
+ if(configured){
+  setCloudTeacherStatus("Supabase ist eingerichtet. Melde dich mit deinem Lehrerkonto an.")
+ }else{
+  setCloudTeacherStatus("Supabase ist noch nicht konfiguriert. Trage URL und Publishable Key in config.js ein.","warn")
+ }
+}
+async function cloudTeacherLogin(){
+ if(!cloudEnabled())return alert("Supabase ist noch nicht eingerichtet.");
+ const email=$("cloudEmail").value.trim();
+ const password=$("cloudPassword").value;
+ if(!email||!password)return alert("Bitte E-Mail und Passwort eingeben.");
+ setCloudTeacherStatus("Anmeldung bei Supabase …");
+ try{
+  const res=await fetch(`${cloudBaseUrl()}/auth/v1/token?grant_type=password`,{
+   method:"POST",
+   headers:{"apikey":cloudKey(),"Content-Type":"application/json"},
+   body:JSON.stringify({email,password})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||!data.access_token)throw new Error(data.error_description||data.msg||"Anmeldung fehlgeschlagen");
+  cloudTeacherToken=data.access_token;
+  $("cloudPassword").value="";
+  $("cloudRefreshBtn").classList.remove("hidden");
+  $("cloudUploadLocalBtn").classList.remove("hidden");
+  $("showLocalResultsBtn").classList.remove("hidden");
+  setCloudTeacherStatus("Angemeldet. Zentrale Ergebnisse werden geladen …","ok");
+  await loadCloudResults()
+ }catch(err){
+  cloudTeacherToken=null;
+  setCloudTeacherStatus(`Supabase-Anmeldung fehlgeschlagen: ${err.message}`,"warn")
+ }
+}
+async function loadCloudResults(){
+ if(!cloudTeacherToken)return alert("Bitte zuerst bei Supabase anmelden.");
+ setCloudTeacherStatus("Cloud-Ergebnisse werden geladen …");
+ try{
+  const res=await fetch(`${cloudBaseUrl()}/rest/v1/music_results?select=*&order=client_timestamp.desc`,{
+   headers:{
+    "apikey":cloudKey(),
+    "Authorization":`Bearer ${cloudTeacherToken}`
+   }
+  });
+  if(!res.ok){
+   const msg=await res.text().catch(()=>"");
+   throw new Error(`Fehler ${res.status}${msg?`: ${msg}`:""}`)
+  }
+  const rows=await res.json();
+  cloudResults=rows.map(fromCloudRow);
+  renderResults();
+  setCloudTeacherStatus(`${cloudResults.length} zentrale Ergebnisse geladen.`,"ok")
+ }catch(err){
+  setCloudTeacherStatus(`Cloud-Ergebnisse konnten nicht geladen werden: ${err.message}`,"warn")
+ }
+}
+async function uploadAllLocalResults(){
+ if(!cloudEnabled())return;
+ const items=getResults().map(normalizeLocalResult);
+ setResults(items);
+ if(!items.length)return alert("Auf diesem Gerät sind keine lokalen Ergebnisse gespeichert.");
+ setCloudTeacherStatus("Lokale Ergebnisse werden zu Supabase übertragen …");
+ let ok=0,failed=0;
+ for(const item of items){
+  const r=await syncOneLocalResult(item,false);
+  r.ok?ok++:failed++
+ }
+ setCloudTeacherStatus(`${ok} lokale Ergebnisse synchronisiert${failed?`, ${failed} fehlgeschlagen`:""}.`,failed?"warn":"ok");
+ if(cloudTeacherToken)await loadCloudResults()
+}
+$("cloudLoginBtn").onclick=cloudTeacherLogin;
+$("cloudRefreshBtn").onclick=loadCloudResults;
+$("cloudUploadLocalBtn").onclick=uploadAllLocalResults;
+$("showLocalResultsBtn").onclick=()=>{
+ cloudResults=null;
+ renderResults();
+ setCloudTeacherStatus("Lokale Ergebnisse dieses Geräts werden angezeigt.")
+};
 
 function b64Encode(obj){
  const bytes=new TextEncoder().encode(JSON.stringify(obj));
@@ -823,3 +1045,5 @@ function applyVersionBadge(){
  if(el)el.textContent=version?`Version ${version}`:"";
 }
 applyVersionBadge();
+
+if(cloudEnabled()){window.addEventListener("load",()=>{syncPendingResults()})}
